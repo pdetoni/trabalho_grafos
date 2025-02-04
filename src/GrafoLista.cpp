@@ -30,10 +30,16 @@ void GrafoLista::carrega_grafo(const std::string& arquivo) {
 
     int u, v, peso;
     while (file >> u >> v >> peso) {
-        if (u >= numVertices || v >= numVertices) {
+        // Valida os vértices no intervalo [1, numVertices]
+        if (u < 1 || u > numVertices || v < 1 || v > numVertices) {
             std::cerr << "Vértice inválido." << std::endl;
             continue;
         }
+
+        // Ajusta os vértices para o intervalo [0, numVertices - 1] internamente
+        u--;
+        v--;
+
         Aresta* novaAresta = new Aresta{v, peso, vertices[u].arestas};
         vertices[u].arestas = novaAresta;
 

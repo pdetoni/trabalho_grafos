@@ -4,6 +4,19 @@
 #include <string>
 
 class Grafo {
+
+    struct Aresta {
+        int destino;
+        int peso;
+        Aresta* prox;
+    };
+
+    struct Vertice {
+        int id;
+        int peso;
+        Aresta* arestas;
+    };
+
 protected:
     int numVertices;          // Número de vértices no grafo
     bool direcionado;         // Define se o grafo é direcionado
