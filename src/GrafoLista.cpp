@@ -24,30 +24,51 @@ GrafoLista::~GrafoLista() {
 void GrafoLista::carrega_grafo(const std::string& arquivo) {
     std::ifstream file(arquivo);
     if (!file.is_open()) {
-        std::cerr << "Erro ao abrir o arquivo." << std::endl;
+        std::cerr << "Erro ao abrir o arquivo: " << arquivo << std::endl;
         return;
     }
 
+    // Lê o cabeçalho
+    int n, dir, vp, ap;
+    file >> n >> dir >> vp >> ap;
+
+    // Atualiza os atributos
+    numVertices = n;
+    direcionado = (dir == 1);
+    verticesPonderados = (vp == 1);
+    arestasPonderadas = (ap == 1);
+
+    // Lê os pesos dos vértices (se aplicável)
+    if (verticesPonderados) {
+        for (int i = 0; i < numVertices; ++i) {
+            file >> vertices[i].peso;
+        }
+    }
+
+    // Lê as arestas
     int u, v, peso;
-    while (file >> u >> v >> peso) {
-        // Valida os vértices no intervalo [1, numVertices]
-        if (u < 1 || u > numVertices || v < 1 || v > numVertices) {
-            std::cerr << "Vértice inválido." << std::endl;
-            continue;
+    while (file >> u >> v) { // Lê u e v primeiro
+        if (arestasPonderadas) {
+            file >> peso; // Lê o peso apenas se necessário
+        } else {
+            peso = 1; // Valor padrão
         }
 
-        // Ajusta os vértices para o intervalo [0, numVertices - 1] internamente
+        // Ajusta os índices para base 0
         u--;
         v--;
 
+        // Adiciona a aresta (u -> v)
         Aresta* novaAresta = new Aresta{v, peso, vertices[u].arestas};
         vertices[u].arestas = novaAresta;
 
+        // Se não for direcionado, adiciona a aresta inversa (v -> u)
         if (!direcionado) {
-            Aresta* novaArestaInversa = new Aresta{u, peso, vertices[v].arestas};
-            vertices[v].arestas = novaArestaInversa;
+            Aresta* arestaInversa = new Aresta{u, peso, vertices[v].arestas};
+            vertices[v].arestas = arestaInversa;
         }
     }
+
     file.close();
 }
 
@@ -97,36 +118,100 @@ int GrafoLista::n_conexo() {
 }
 
 int GrafoLista::get_grau() {
-    int grau = 0;
-    for (int i = 0; i < numVertices; ++i) {
-        int grauVertice = 0;
-        Aresta* aresta = vertices[i].arestas;
-        while (aresta) {
-            grauVertice++;
-            aresta = aresta->proxima;
+    int grauMax = 0;
+
+    if (eh_direcionado()) {
+        // Para grafos direcionados, o grau é a soma das arestas de entrada e saída
+        for (int i = 0; i < numVertices; ++i) {
+            // Grau de saída (arestas que partem do vértice i)
+            int grauSaida = 0;
+            Aresta* arestaSaida = vertices[i].arestas;
+            while (arestaSaida) {
+                grauSaida++;
+                arestaSaida = arestaSaida->proxima;
+            }
+
+            // Grau de entrada (arestas que chegam ao vértice i)
+            int grauEntrada = 0;
+            for (int j = 0; j < numVertices; ++j) {
+                if (j != i) { // Não precisa verificar o próprio vértice
+                    Aresta* arestaEntrada = vertices[j].arestas;
+                    while (arestaEntrada) {
+                        if (arestaEntrada->destino == i) {
+                            grauEntrada++;
+                        }
+                        arestaEntrada = arestaEntrada->proxima;
+                    }
+                }
+            }
+
+            int grauTotal = grauSaida + grauEntrada;
+            if (grauTotal > grauMax) {
+                grauMax = grauTotal;
+            }
         }
-        if (grauVertice > grau) {
-            grau = grauVertice;
+    } else {
+        // Para grafos não direcionados, o grau é o número de arestas
+        for (int i = 0; i < numVertices; ++i) {
+            int grau = 0;
+            Aresta* aresta = vertices[i].arestas;
+            while (aresta) {
+                grau++;
+                aresta = aresta->proxima;
+            }
+            if (grau > grauMax) {
+                grauMax = grau;
+            }
         }
     }
-    return grau;
+
+    return grauMax;
 }
 
 bool GrafoLista::eh_completo() {
     for (int i = 0; i < numVertices; ++i) {
+        // Cria um array para marcar os vértices conectados ao vértice i
         bool* conectado = new bool[numVertices]{false};
+
         Aresta* aresta = vertices[i].arestas;
         while (aresta) {
             conectado[aresta->destino] = true;
             aresta = aresta->proxima;
         }
+
+        // Verifica se o vértice i está conectado a todos os outros vértices
         for (int j = 0; j < numVertices; ++j) {
             if (i != j && !conectado[j]) {
                 delete[] conectado;
                 return false;
             }
         }
+
         delete[] conectado;
     }
+
+    // Se o grafo é direcionado, precisamos verificar também as conexões inversas
+    if (direcionado) {
+        for (int i = 0; i < numVertices; ++i) {
+            bool* conectado = new bool[numVertices]{false};
+
+            Aresta* aresta = vertices[i].arestas;
+            while (aresta) {
+                conectado[aresta->destino] = true;
+                aresta = aresta->proxima;
+            }
+
+            // Verifica se todos os vértices estão conectados ao vértice i
+            for (int j = 0; j < numVertices; ++j) {
+                if (i != j && !conectado[j]) {
+                    delete[] conectado;
+                    return false;
+                }
+            }
+
+            delete[] conectado;
+        }
+    }
+
     return true;
 }

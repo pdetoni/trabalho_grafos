@@ -25,44 +25,52 @@ void GrafoMatriz::carrega_grafo(const std::string& arquivo) {
     // Lê a primeira linha (cabeçalho)
     int n, dir, vp, ap;
     file >> n >> dir >> vp >> ap;
-    // Obs.: supomos que 'numVertices' já foi definido (na construção) com o valor lido
 
-    int u, v, peso;
-    // Lê as arestas do arquivo – lembre-se que os vértices estão indexados a partir de 1
-    while (file >> u >> v >> peso) {
-        // Se ainda não existe uma aresta (para evitar sobrescrever duplicata),
-        // atribui o peso lido.
-        if (matrizAdj[u-1][v-1] == 0)
-            matrizAdj[u-1][v-1] = peso;
-        // Se o grafo NÃO é direcionado, insere também na posição simétrica
-        if (!eh_direcionado() && matrizAdj[v-1][u-1] == 0)
-            matrizAdj[v-1][u-1] = peso;
+    // Atualiza os atributos da classe base
+    numVertices = n;
+    direcionado = (dir == 1);
+    verticesPonderados = (vp == 1);
+    arestasPonderadas = (ap == 1);
+
+    // Se os vértices são ponderados, lê os pesos dos vértices
+    if (verticesPonderados) {
+        int* pesos = new int[numVertices];
+        for (int i = 0; i < numVertices; i++) {
+            file >> pesos[i];
+        }
+        // Aqui você pode armazenar os pesos dos vértices em alguma estrutura
+        // Por exemplo, você pode adicionar um array de pesos como atributo da classe
+        delete[] pesos;
     }
-    file.close();
 
-    // -- Completa o grafo se ele for (ou se se deseja) completo --
-    // Um grafo completo (segundo o critério da função eh_completo())
-    // exige que para cada par de vértices distintos exista uma aresta.
-    // Aqui, para cada par (i,j) com i ≠ j onde não haja aresta,
-    // inserimos um "peso padrão" (1). No caso de grafo direcionado,
-    // a ideia é preencher apenas uma das direções, de modo que para o par
-    // (i,j) pelo menos um dos elementos (matrizAdj[i][j] ou matrizAdj[j][i])
-    // seja não zero.
+    // Inicializa a matriz com zeros
+    matrizAdj = new int*[numVertices];
     for (int i = 0; i < numVertices; i++) {
+        matrizAdj[i] = new int[numVertices];
         for (int j = 0; j < numVertices; j++) {
-            if (i != j && matrizAdj[i][j] == 0) {
-                if (eh_direcionado()) {
-                    // Para grafos direcionados: se também não há aresta inversa, preenche
-                    if (matrizAdj[j][i] == 0)
-                        matrizAdj[i][j] = 1;
-                } else {
-                    // Para grafos não direcionados, preenche sempre a posição faltante
-                    matrizAdj[i][j] = 1;
-                }
-            }
+            matrizAdj[i][j] = 0;
         }
     }
-    
+
+    // Lê as arestas
+    int u, v, peso;
+    while (file >> u >> v) {
+        if (arestasPonderadas) {
+            file >> peso;
+        } else {
+            peso = 1;  // Se não for ponderada, usa peso 1
+        }
+
+        // Como os vértices começam em 1 no arquivo, subtrai 1 para indexar o array
+        matrizAdj[u-1][v-1] = peso;
+
+        // Se o grafo não é direcionado, espelha a aresta
+        if (!direcionado) {
+            matrizAdj[v-1][u-1] = peso;
+        }
+    }
+
+    file.close();
 }
 
 void GrafoMatriz::get_vizinhos(int v, int*& vizinhos, int& tamanho) {
@@ -104,22 +112,44 @@ void GrafoMatriz::get_arestas(int*& arestas, int& tamanho) {
     }
 }
 
+void dfs(int v, bool* visitado, GrafoMatriz* grafo) {
+    visitado[v] = true;
+    int* vizinhos;
+    int tamanho;
+    grafo->get_vizinhos(v, vizinhos, tamanho);
+    for (int i = 0; i < tamanho; i++) {
+        if (!visitado[vizinhos[i]]) {
+            dfs(vizinhos[i], visitado, grafo);
+        }
+    }
+    delete[] vizinhos;
+}
+
 int GrafoMatriz::n_conexo() {
-    // Implementação do cálculo de componentes conexas (DFS ou BFS)
-    // Retorna o número de componentes conexas
-    return 0;
+    bool* visitado = new bool[numVertices]{false};
+    int componentes = 0;
+    for (int i = 0; i < numVertices; i++) {
+        if (!visitado[i]) {
+            dfs(i, visitado, this);
+            componentes++;
+        }
+    }
+    delete[] visitado;
+    return componentes;
 }
 
 int GrafoMatriz::get_grau() {
     int grauMax = 0;
     if (eh_direcionado()) {
         for (int i = 0; i < numVertices; i++) {
-            int grau = 0;
+            int grauSaida = 0;
+            int grauEntrada = 0;
             for (int j = 0; j < numVertices; j++) {
-                if (matrizAdj[i][j] != 0) grau++;      // saídas
-                if (matrizAdj[j][i] != 0) grau++;      // entradas
+                if (matrizAdj[i][j] != 0) grauSaida++;
+                if (matrizAdj[j][i] != 0) grauEntrada++;
             }
-            if (grau > grauMax) grauMax = grau;
+            int grauTotal = grauSaida + grauEntrada;
+            if (grauTotal > grauMax) grauMax = grauTotal;
         }
     } else {
         for (int i = 0; i < numVertices; i++) {
@@ -136,11 +166,19 @@ int GrafoMatriz::get_grau() {
 
 bool GrafoMatriz::eh_completo() {
     for (int i = 0; i < numVertices; i++) {
-        for (int j = i+1; j < numVertices; j++) {
-            if (matrizAdj[i][j] == 0 && matrizAdj[j][i] == 0)
-                return false;
+        for (int j = 0; j < numVertices; j++) {
+            if (i != j) { // Ignora a diagonal principal
+                if (eh_direcionado()) {
+                    // Para grafos direcionados, ambas as arestas (i,j) e (j,i) devem existir
+                    if (matrizAdj[i][j] == 0 || matrizAdj[j][i] == 0)
+                        return false;
+                } else {
+                    // Para grafos não direcionados, apenas uma das arestas (i,j) ou (j,i) deve existir
+                    if (matrizAdj[i][j] == 0)
+                        return false;
+                }
+            }
         }
     }
     return true;
 }
-

@@ -17,6 +17,7 @@ private:
 
     struct Vertice {
         int id;
+        int peso;
         Aresta* arestas;
     };
 
