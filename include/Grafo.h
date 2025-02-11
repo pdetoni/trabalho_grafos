@@ -2,6 +2,7 @@
 #define GRAFO_H
 
 #include <string>
+#include "ListaEncadeada.h"
 
 class Grafo {
 
