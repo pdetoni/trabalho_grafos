@@ -14,7 +14,7 @@ GrafoMatriz::~GrafoMatriz() {
     }
     delete[] matrizAdj;
 }
-
+/*
 void GrafoMatriz::carrega_grafo(const std::string& arquivo) {
     std::ifstream file(arquivo);
     if (!file.is_open()) {
@@ -72,8 +72,31 @@ void GrafoMatriz::carrega_grafo(const std::string& arquivo) {
 
     file.close();
 }
+*/
+void GrafoMatriz::inicializa_estrutura() {
+    // Aloca e inicializa a matriz
+    matrizAdj = new int*[numVertices];
+    for (int i = 0; i < numVertices; i++) {
+        matrizAdj[i] = new int[numVertices];
+        for (int j = 0; j < numVertices; j++) {
+            matrizAdj[i][j] = 0;
+        }
+    }
+    
+    
+}
 
-void GrafoMatriz::get_vizinhos(int v, int*& vizinhos, int& tamanho) {
+void GrafoMatriz::adiciona_aresta(int origem, int destino, int peso){
+    matrizAdj[origem][destino] = peso;
+    if(!direcionado){
+        matrizAdj[destino][origem] = peso;
+    } 
+}
+
+
+
+
+void GrafoMatriz::get_vizinhos(int v, int*& vizinhos, int& tamanho) const {
     tamanho = 0;
     for (int i = 0; i < numVertices; ++i) {
         if (matrizAdj[v][i] != 0) {
@@ -89,7 +112,14 @@ void GrafoMatriz::get_vizinhos(int v, int*& vizinhos, int& tamanho) {
         }
     }
 }
-
+/*
+int GrafoMatriz::get_grau_vertice(int v) const{
+    int grau = 0;
+    int* vizinhos;
+    get_vizinhos(v, vizinhos, grau);
+    return grau;
+}
+*/
 void GrafoMatriz::get_arestas(int*& arestas, int& tamanho) {
     tamanho = 0;
     for (int i = 0; i < numVertices; ++i) {
@@ -111,33 +141,7 @@ void GrafoMatriz::get_arestas(int*& arestas, int& tamanho) {
         }
     }
 }
-
-void dfs(int v, bool* visitado, GrafoMatriz* grafo) {
-    visitado[v] = true;
-    int* vizinhos;
-    int tamanho;
-    grafo->get_vizinhos(v, vizinhos, tamanho);
-    for (int i = 0; i < tamanho; i++) {
-        if (!visitado[vizinhos[i]]) {
-            dfs(vizinhos[i], visitado, grafo);
-        }
-    }
-    delete[] vizinhos;
-}
-
-int GrafoMatriz::n_conexo() {
-    bool* visitado = new bool[numVertices]{false};
-    int componentes = 0;
-    for (int i = 0; i < numVertices; i++) {
-        if (!visitado[i]) {
-            dfs(i, visitado, this);
-            componentes++;
-        }
-    }
-    delete[] visitado;
-    return componentes;
-}
-
+/*
 int GrafoMatriz::get_grau() {
     int grauMax = 0;
     if (eh_direcionado()) {
@@ -162,7 +166,7 @@ int GrafoMatriz::get_grau() {
     }
     return grauMax;
 }
-
+*/
 
 bool GrafoMatriz::existeAresta(int u, int v) const {
     return matrizAdj[u][v] != 0;
