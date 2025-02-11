@@ -168,50 +168,13 @@ int GrafoLista::get_grau() {
     return grauMax;
 }
 
-bool GrafoLista::eh_completo() {
-    for (int i = 0; i < numVertices; ++i) {
-        // Cria um array para marcar os vértices conectados ao vértice i
-        bool* conectado = new bool[numVertices]{false};
-
-        Aresta* aresta = vertices[i].arestas;
-        while (aresta) {
-            conectado[aresta->destino] = true;
-            aresta = aresta->proxima;
+bool GrafoLista::existeAresta(int u, int v) const {
+    Aresta* aresta = vertices[u].arestas;
+    while (aresta) {
+        if (aresta->destino == v) {
+            return true;
         }
-
-        // Verifica se o vértice i está conectado a todos os outros vértices
-        for (int j = 0; j < numVertices; ++j) {
-            if (i != j && !conectado[j]) {
-                delete[] conectado;
-                return false;
-            }
-        }
-
-        delete[] conectado;
+        aresta = aresta->proxima;
     }
-
-    // Se o grafo é direcionado, precisamos verificar também as conexões inversas
-    if (direcionado) {
-        for (int i = 0; i < numVertices; ++i) {
-            bool* conectado = new bool[numVertices]{false};
-
-            Aresta* aresta = vertices[i].arestas;
-            while (aresta) {
-                conectado[aresta->destino] = true;
-                aresta = aresta->proxima;
-            }
-
-            // Verifica se todos os vértices estão conectados ao vértice i
-            for (int j = 0; j < numVertices; ++j) {
-                if (i != j && !conectado[j]) {
-                    delete[] conectado;
-                    return false;
-                }
-            }
-
-            delete[] conectado;
-        }
-    }
-
-    return true;
+    return false;
 }

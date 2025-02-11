@@ -164,21 +164,6 @@ int GrafoMatriz::get_grau() {
 }
 
 
-bool GrafoMatriz::eh_completo() {
-    for (int i = 0; i < numVertices; i++) {
-        for (int j = 0; j < numVertices; j++) {
-            if (i != j) { // Ignora a diagonal principal
-                if (eh_direcionado()) {
-                    // Para grafos direcionados, ambas as arestas (i,j) e (j,i) devem existir
-                    if (matrizAdj[i][j] == 0 || matrizAdj[j][i] == 0)
-                        return false;
-                } else {
-                    // Para grafos não direcionados, apenas uma das arestas (i,j) ou (j,i) deve existir
-                    if (matrizAdj[i][j] == 0)
-                        return false;
-                }
-            }
-        }
-    }
-    return true;
+bool GrafoMatriz::existeAresta(int u, int v) const {
+    return matrizAdj[u][v] != 0;
 }

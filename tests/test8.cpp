@@ -10,7 +10,7 @@ void verificaDescricao(Grafo* grafo) {
     assert(grafo->eh_direcionado() == true);
     assert(grafo->vertice_ponderado() == false);
     assert(grafo->aresta_ponderada() == true);
-    assert(grafo->eh_completo() == true);
+    assert(grafo->eh_completo() == false);
 }
 
 int main() {

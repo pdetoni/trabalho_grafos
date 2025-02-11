@@ -26,3 +26,15 @@ bool Grafo::vertice_ponderado() {
 bool Grafo::aresta_ponderada() {
     return arestasPonderadas;
 }
+
+bool Grafo::eh_completo() const{
+    int n = numVertices;
+        for (int i = 0; i < n; ++i) {
+            for (int j = 0; j < n; ++j) {
+                if (i != j && !existeAresta(i, j)) {
+                    return false;
+                }
+            }
+        }
+        return true;
+}

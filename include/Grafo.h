@@ -33,7 +33,7 @@ public:
     // Funções virtuais puras (abstrações)
     virtual int n_conexo() = 0;
     virtual int get_grau() = 0;
-    virtual bool eh_completo() = 0;
+    bool eh_completo() const;
     virtual void carrega_grafo(const std::string& arquivo) = 0;
     virtual void get_vizinhos(int v, int*& vizinhos, int& tamanho) = 0;
     virtual void get_arestas(int*& arestas, int& tamanho) = 0;
@@ -43,6 +43,9 @@ public:
     virtual bool eh_direcionado(); // Verifica se o grafo é direcionado
     virtual bool vertice_ponderado(); // Verifica se os vértices são ponderados
     virtual bool aresta_ponderada();  // Verifica se as arestas são ponderadas
+
+    virtual bool existeAresta(int u, int v) const = 0; // Verifica se existe uma aresta entre u e v
+
 };
 
 #endif // GRAFO_H

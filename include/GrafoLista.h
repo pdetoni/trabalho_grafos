@@ -32,7 +32,8 @@ public:
     void get_arestas(int*& arestas, int& tamanho) override;
     int n_conexo() override;
     int get_grau() override;
-    bool eh_completo() override;
+   // bool eh_completo() override;
+    bool existeAresta(int u, int v) const override;
 };
 
 #endif // GRAFOLISTA_H
