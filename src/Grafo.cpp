@@ -1,6 +1,5 @@
 #include "Grafo.h"
 
-
 // Construtor
 Grafo::Grafo(int n, bool dir, bool vp, bool ap)
     : numVertices(n), direcionado(dir), verticesPonderados(vp), arestasPonderadas(ap) {}
@@ -28,18 +27,19 @@ bool Grafo::aresta_ponderada() {
     return arestasPonderadas;
 }
 
-bool Grafo::eh_completo() const{
-    int n = numVertices;
-        for (int i = 0; i < n; ++i) {
-            for (int j = 0; j < n; ++j) {
-                if (i != j && !existeAresta(i, j)) {
-                    return false;
-                }
+// Verifica se o grafo é completo
+bool Grafo::eh_completo() const {
+    for (int i = 0; i < numVertices; ++i) {
+        for (int j = 0; j < numVertices; ++j) {
+            if (i != j && !existeAresta(i, j)) {
+                return false;
             }
         }
-        return true;
+    }
+    return true;
 }
 
+// Carrega o grafo de um arquivo
 void Grafo::carrega_grafo(const std::string& arquivo) {
     std::ifstream file(arquivo);
     if (!file.is_open()) {
@@ -64,7 +64,7 @@ void Grafo::carrega_grafo(const std::string& arquivo) {
     if (verticesPonderados) {
         for (int i = 0; i < numVertices; ++i) {
             int peso;
-            file >> peso;            
+            file >> peso;
         }
     }
 
@@ -93,83 +93,159 @@ void Grafo::carrega_grafo(const std::string& arquivo) {
     file.close();
 }
 
-int Grafo::n_conexo()  {
-        int n = numVertices;
-        bool* visitado = new bool[n](); // Array dinâmico para rastrear vértices visitados
-        int componentes = 0;
+// Retorna o número de componentes conexos
+int Grafo::n_conexo() {
+    bool* visitado = new bool[numVertices]();
+    int componentes = 0;
 
-        for (int i = 0; i < n; ++i) {
-            if (!visitado[i]) {
-                dfs(i, visitado); // ou dfs(i, visitado);
-                componentes++;
+    for (int i = 0; i < numVertices; ++i) {
+        if (!visitado[i]) {
+            dfs(i, visitado);
+            componentes++;
+        }
+    }
+
+    delete[] visitado;
+    return componentes;
+}
+
+// Função auxiliar para DFS
+void Grafo::dfs(int v, bool* visitado) {
+    visitado[v] = true;
+
+    int* vizinhos;
+    int tamanho;
+    get_vizinhos(v, vizinhos, tamanho);
+
+    for (int i = 0; i < tamanho; ++i) {
+        int vizinho = vizinhos[i];
+        if (!visitado[vizinho]) {
+            dfs(vizinho, visitado);
+        }
+    }
+
+    delete[] vizinhos;
+}
+
+// Retorna o grau máximo do grafo
+int Grafo::get_grau() {
+    int grauMax = 0;
+    if (eh_direcionado()) {
+        for (int i = 0; i < numVertices; i++) {
+            int grauSaida = 0;
+            int grauEntrada = 0;
+            for (int j = 0; j < numVertices; j++) {
+                if (existeAresta(i, j)) grauSaida++;
+                if (existeAresta(j, i)) grauEntrada++;
+            }
+            int grauTotal = grauSaida + grauEntrada;
+            if (grauTotal > grauMax) grauMax = grauTotal;
+        }
+    } else {
+        for (int i = 0; i < numVertices; i++) {
+            int grau = 0;
+            for (int j = 0; j < numVertices; j++) {
+                if (existeAresta(i, j)) grau++;
+            }
+            if (grau > grauMax) grauMax = grau;
+        }
+    }
+    return grauMax;
+}
+
+// Adiciona um novo nó ao grafo
+void Grafo::novo_no() {
+    numVertices++;
+    inicializa_estrutura(); // Reconfigura a estrutura para o novo tamanho
+}
+
+// Adiciona uma nova aresta ao grafo
+void Grafo::nova_aresta(int origem, int destino, int peso) {
+    adiciona_aresta(origem, destino, peso);
+}
+
+// Remove um nó do grafo
+void Grafo::deleta_no(int id) {
+    if (id < 0 || id >= numVertices) {
+        std::cerr << "Erro: ID do nó inválido." << std::endl;
+        return;
+    }
+
+    // Remove todas as arestas associadas ao nó
+    for (int i = 0; i < numVertices; ++i) {
+        deleta_aresta(i, id);
+        deleta_aresta(id, i);
+    }
+
+    // Reorganiza os IDs dos nós
+    numVertices--;
+}
+
+// Remove uma aresta do grafo
+void Grafo::deleta_aresta(int origem, int destino) {
+    if (origem < 0 || origem >= numVertices || destino < 0 || destino >= numVertices) {
+        std::cerr << "Erro: IDs dos nós inválidos." << std::endl;
+        return;
+    }
+
+    // Remove a aresta
+    adiciona_aresta(origem, destino, 0); // Define o peso como 0 (sem aresta)
+}
+
+// Calcula a menor distância entre dois nós
+double Grafo::menor_distancia(int u, int v) {
+    return menor_distancia_dijkstra(u, v);
+}
+
+// Função auxiliar para calcular a menor distância usando Dijkstra
+double Grafo::menor_distancia_dijkstra(int u, int v) {
+    double* dist = new double[numVertices];
+    bool* visitado = new bool[numVertices]();
+    for (int i = 0; i < numVertices; ++i) {
+        dist[i] = std::numeric_limits<double>::max();
+    }
+
+    dist[u] = 0;
+
+    while (true) {
+        int atual = -1;
+        double menorDistancia = std::numeric_limits<double>::max();
+
+        // Encontra o nó não visitado com a menor distância
+        for (int i = 0; i < numVertices; ++i) {
+            if (!visitado[i] && dist[i] < menorDistancia) {
+                atual = i;
+                menorDistancia = dist[i];
             }
         }
 
-        delete[] visitado; // Liberar memória alocada
-        return componentes;
-    }
+        if (atual == -1 || atual == v) {
+            break; // Todos os nós foram visitados ou chegamos ao destino
+        }
 
-    void Grafo::dfs(int v, bool* visitado) {
-        visitado[v] = true;
+        visitado[atual] = true;
 
         int* vizinhos;
         int tamanho;
-        get_vizinhos(v, vizinhos, tamanho);
+        get_vizinhos(atual, vizinhos, tamanho);
 
         for (int i = 0; i < tamanho; ++i) {
             int vizinho = vizinhos[i];
-            if (!visitado[vizinho]) {
-                dfs(vizinho, visitado);
+            double pesoAresta = 0;
+            if (arestasPonderadas) {
+                pesoAresta = 1; // Substitua por get_peso_aresta(atual, vizinho) se existir
+            }
+            double novaDistancia = dist[atual] + pesoAresta;
+            if (novaDistancia < dist[vizinho]) {
+                dist[vizinho] = novaDistancia;
             }
         }
 
         delete[] vizinhos;
     }
 
-    int Grafo::get_grau() {
-        int grauMax = 0;
-        if (eh_direcionado()) {
-            for (int i = 0; i < numVertices; i++) {
-                int grauSaida = 0;
-                int grauEntrada = 0;
-                for (int j = 0; j < numVertices; j++) {
-                    if (existeAresta(i, j)) grauSaida++;
-                    if (existeAresta(j, i)) grauEntrada++;
-                }
-                int grauTotal = grauSaida + grauEntrada;
-                if (grauTotal > grauMax) grauMax = grauTotal;
-            }
-        } else {
-            for (int i = 0; i < numVertices; i++) {
-                int grau = 0;
-                for (int j = 0; j < numVertices; j++) {
-                    if (existeAresta(i, j)) grau++;
-                }
-                if (grau > grauMax) grauMax = grau;
-            }
-        }
-        return grauMax;
-    }
-/*
-    int Grafo::get_grau() const {
-        int maior_grau = 0;
-        
-        for(int i = 0; i < numVertices; i++) {
-            int grau = get_grau_vertice(i);
-            if(grau > maior_grau) {
-                maior_grau = grau;
-            }
-            
-        }
-        
-        return maior_grau;
-    }*/
-/*
-    int Grafo::get_grau_vertice(int v) const {
-        int grau = 0;
-        int* vizinhos;
-        get_vizinhos(v, vizinhos, grau);
-        return grau;
-    }*/
-
-
+    double resultado = dist[v];
+    delete[] dist;
+    delete[] visitado;
+    return resultado;
+}

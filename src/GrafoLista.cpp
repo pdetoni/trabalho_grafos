@@ -20,58 +20,7 @@ GrafoLista::~GrafoLista() {
     }
     delete[] vertices;
 }
-/*
-void GrafoLista::carrega_grafo(const std::string& arquivo) {
-    std::ifstream file(arquivo);
-    if (!file.is_open()) {
-        std::cerr << "Erro ao abrir o arquivo: " << arquivo << std::endl;
-        return;
-    }
 
-    // Lê o cabeçalho
-    int n, dir, vp, ap;
-    file >> n >> dir >> vp >> ap;
-
-    // Atualiza os atributos
-    numVertices = n;
-    direcionado = (dir == 1);
-    verticesPonderados = (vp == 1);
-    arestasPonderadas = (ap == 1);
-
-    // Lê os pesos dos vértices (se aplicável)
-    if (verticesPonderados) {
-        for (int i = 0; i < numVertices; ++i) {
-            file >> vertices[i].peso;
-        }
-    }
-
-    // Lê as arestas
-    int u, v, peso;
-    while (file >> u >> v) { // Lê u e v primeiro
-        if (arestasPonderadas) {
-            file >> peso; // Lê o peso apenas se necessário
-        } else {
-            peso = 1; // Valor padrão
-        }
-
-        // Ajusta os índices para base 0
-        u--;
-        v--;
-
-        // Adiciona a aresta (u -> v)
-        Aresta* novaAresta = new Aresta{v, peso, vertices[u].arestas};
-        vertices[u].arestas = novaAresta;
-
-        // Se não for direcionado, adiciona a aresta inversa (v -> u)
-        if (!direcionado) {
-            Aresta* arestaInversa = new Aresta{u, peso, vertices[v].arestas};
-            vertices[v].arestas = arestaInversa;
-        }
-    }
-
-    file.close();
-}
-*/
 void GrafoLista::inicializa_estrutura() {
     vertices = new Vertice[numVertices];
     for (int i = 0; i < numVertices; i++) {
@@ -123,63 +72,6 @@ void GrafoLista::get_arestas(int*& arestas, int& tamanho) {
         }
     }
 }
-/*
-int GrafoLista::get_grau() {
-    int grauMax = 0;
-
-    if (eh_direcionado()) {
-        // Para grafos direcionados, o grau é a soma das arestas de entrada e saída
-        for (int i = 0; i < numVertices; ++i) {
-            // Grau de saída (arestas que partem do vértice i)
-            int grauSaida = 0;
-            Aresta* arestaSaida = vertices[i].arestas;
-            while (arestaSaida) {
-                grauSaida++;
-                arestaSaida = arestaSaida->proxima;
-            }
-
-            // Grau de entrada (arestas que chegam ao vértice i)
-            int grauEntrada = 0;
-            for (int j = 0; j < numVertices; ++j) {
-                Aresta* arestaEntrada = vertices[j].arestas;
-                while (arestaEntrada) {
-                    if (arestaEntrada->destino == i) {
-                        grauEntrada++;
-                    }
-                    arestaEntrada = arestaEntrada->proxima;
-                }
-            }
-
-            int grauTotal = grauSaida + grauEntrada;
-            if (grauTotal > grauMax) {
-                grauMax = grauTotal;
-            }
-        }
-    } else {
-        // Para grafos não direcionados, o grau é o número de arestas
-        for (int i = 0; i < numVertices; ++i) {
-            int grau = 0;
-            Aresta* aresta = vertices[i].arestas;
-            while (aresta) {
-                grau++;
-                aresta = aresta->proxima;
-            }
-            if (grau > grauMax) {
-                grauMax = grau;
-            }
-        }
-    }
-
-    return grauMax;
-}
-*/
-/*
-int GrafoLista::get_grau_vertice(int v) const {
-    int grau;    
-    int* vizinhos;
-    get_vizinhos(v, vizinhos, grau);
-    return grau;
-}*/
 
 bool GrafoLista::existeAresta(int u, int v) const {
     Aresta* aresta = vertices[u].arestas;
