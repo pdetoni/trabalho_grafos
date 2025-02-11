@@ -31,10 +31,6 @@ int main() {
     grafoMatriz = new GrafoMatriz(numVertices, direcionado, verticesPonderados, arestasPonderadas);
     grafoLista = new GrafoLista(numVertices, direcionado, verticesPonderados, arestasPonderadas);
 
-    // cout vertice_ponderado
-    std::cout << "MATRIZ" << grafoMatriz->vertice_ponderado() << std::endl;
-    std::cout << "LISTA" << grafoLista->vertice_ponderado() << std::endl;
-
     grafoMatriz->carrega_grafo(arquivo);
     grafoLista->carrega_grafo(arquivo);
 

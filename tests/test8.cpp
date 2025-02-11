@@ -34,10 +34,6 @@ int main() {
     grafoMatriz->carrega_grafo(arquivo);
     grafoLista->carrega_grafo(arquivo);
 
-    //TODO: Arruamar eh_completo
-    std::cout << "MATRIZ é completo: " << grafoMatriz->eh_completo() << std::endl;
-    std::cout << "LISTA é completo: " << grafoLista->eh_completo() << std::endl;
-
     verificaDescricao(grafoMatriz);
     verificaDescricao(grafoLista);
 

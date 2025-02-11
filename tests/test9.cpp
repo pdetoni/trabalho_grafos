@@ -34,10 +34,6 @@ int main() {
     grafoMatriz->carrega_grafo(arquivo);
     grafoLista->carrega_grafo(arquivo);
 
-    //TODO: Arrumar Grau Lista
-    std::cout << "MATRIZ grau: " << grafoMatriz->get_grau() << std::endl;
-    std::cout << "LISTA grau: " << grafoLista->get_grau() << std::endl;
-
     verificaDescricao(grafoMatriz);
     verificaDescricao(grafoLista);
 

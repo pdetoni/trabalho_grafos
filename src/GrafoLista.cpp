@@ -134,14 +134,12 @@ int GrafoLista::get_grau() {
             // Grau de entrada (arestas que chegam ao vértice i)
             int grauEntrada = 0;
             for (int j = 0; j < numVertices; ++j) {
-                if (j != i) { // Não precisa verificar o próprio vértice
-                    Aresta* arestaEntrada = vertices[j].arestas;
-                    while (arestaEntrada) {
-                        if (arestaEntrada->destino == i) {
-                            grauEntrada++;
-                        }
-                        arestaEntrada = arestaEntrada->proxima;
+                Aresta* arestaEntrada = vertices[j].arestas;
+                while (arestaEntrada) {
+                    if (arestaEntrada->destino == i) {
+                        grauEntrada++;
                     }
+                    arestaEntrada = arestaEntrada->proxima;
                 }
             }
 
