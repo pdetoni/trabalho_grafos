@@ -20,7 +20,7 @@ GrafoLista::~GrafoLista() {
     }
     delete[] vertices;
 }
-
+/*
 void GrafoLista::carrega_grafo(const std::string& arquivo) {
     std::ifstream file(arquivo);
     if (!file.is_open()) {
@@ -71,8 +71,21 @@ void GrafoLista::carrega_grafo(const std::string& arquivo) {
 
     file.close();
 }
+*/
+void GrafoLista::inicializa_estrutura() {
+    vertices = new Vertice[numVertices];
+    for (int i = 0; i < numVertices; i++) {
+        vertices[i].arestas = nullptr;
+        vertices[i].peso = 0;
+    }
+}
 
-void GrafoLista::get_vizinhos(int v, int*& vizinhos, int& tamanho) {
+void GrafoLista::adiciona_aresta(int origem, int destino, int peso) {
+    Aresta* novaAresta = new Aresta{destino, peso, vertices[origem].arestas};
+    vertices[origem].arestas = novaAresta;
+}
+
+void GrafoLista::get_vizinhos(int v, int*& vizinhos, int& tamanho) const {
     tamanho = 0;
     Aresta* aresta = vertices[v].arestas;
     while (aresta) {
@@ -110,13 +123,7 @@ void GrafoLista::get_arestas(int*& arestas, int& tamanho) {
         }
     }
 }
-
-int GrafoLista::n_conexo() {
-    // Implementação do cálculo de componentes conexas (DFS ou BFS)
-    // Retorna o número de componentes conexas
-    return 0;
-}
-
+/*
 int GrafoLista::get_grau() {
     int grauMax = 0;
 
@@ -165,6 +172,14 @@ int GrafoLista::get_grau() {
 
     return grauMax;
 }
+*/
+/*
+int GrafoLista::get_grau_vertice(int v) const {
+    int grau;    
+    int* vizinhos;
+    get_vizinhos(v, vizinhos, grau);
+    return grau;
+}*/
 
 bool GrafoLista::existeAresta(int u, int v) const {
     Aresta* aresta = vertices[u].arestas;
