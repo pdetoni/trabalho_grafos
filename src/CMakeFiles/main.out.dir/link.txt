@@ -1,1 +1,0 @@
-/usr/bin/c++ CMakeFiles/main.out.dir/Grafo.cpp.o CMakeFiles/main.out.dir/GrafoLista.cpp.o CMakeFiles/main.out.dir/GrafoMatriz.cpp.o CMakeFiles/main.out.dir/main.cpp.o -o main.out 
