@@ -54,12 +54,12 @@ int main(int argc, char* argv[]) {
     // Exemplo de uso das novas funções
     grafo->novo_no();
     grafo->nova_aresta(0, 1, 5);
-    imprimirDescricao(grafo); 
 
-    grafo->deleta_no(0);
-    grafo->deleta_aresta(0, 1);
-    imprimirDescricao(grafo); 
+    // grafo->deleta_no(0);
+    // grafo->deleta_aresta(0, 1);
+
     int distancia = grafo->menor_distancia(2, 1);
+    imprimirDescricao(grafo); 
     std::cout << "Menor distância entre 2 e 1: " << distancia << std::endl;
     
 

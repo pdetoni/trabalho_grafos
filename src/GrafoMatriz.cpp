@@ -1,93 +1,97 @@
 #include "GrafoMatriz.h"
 
 GrafoMatriz::GrafoMatriz(int n, bool dir, bool vp, bool ap)
-    : Grafo(n, dir, vp, ap) {
-    matrizAdj = new int*[n];
-    for (int i = 0; i < n; ++i) {
-        matrizAdj[i] = new int[n]{0}; // Inicializa a matriz com zeros
+    : Grafo(n, dir, vp, ap), capacidade(10) {
+    if (n > capacidade) {
+        capacidade = n;
     }
+    inicializa_estrutura();
 }
 
 GrafoMatriz::~GrafoMatriz() {
-    for (int i = 0; i < numVertices; ++i) {
+    for (int i = 0; i < capacidade; ++i) {
         delete[] matrizAdj[i];
     }
     delete[] matrizAdj;
 }
 
 void GrafoMatriz::inicializa_estrutura() {
-    // Aloca e inicializa a matriz
-    matrizAdj = new int*[numVertices];
-    for (int i = 0; i < numVertices; i++) {
-        matrizAdj[i] = new int[numVertices];
-        for (int j = 0; j < numVertices; j++) {
-            matrizAdj[i][j] = 0;
-        }
+    matrizAdj = new int*[capacidade];
+    for (int i = 0; i < capacidade; ++i) {
+        matrizAdj[i] = new int[capacidade]{0}; // Inicializa a matriz com zeros
     }
-    
-    
 }
 
-void GrafoMatriz::adiciona_aresta(int origem, int destino, int peso){
-    matrizAdj[origem][destino] = peso;
-    if(!direcionado){
-        matrizAdj[destino][origem] = peso;
-    } 
-}
+void GrafoMatriz::redimensionarMatriz(int novaCapacidade) {
+    int** novaMatriz = new int*[novaCapacidade];
+    for (int i = 0; i < novaCapacidade; ++i) {
+        novaMatriz[i] = new int[novaCapacidade]{0};
+    }
 
-
-
-void GrafoMatriz::adiciona_no(){
-    int** matrizAux = new int*[numVertices + 1];
     for (int i = 0; i < numVertices; ++i) {
-        matrizAux[i] = new int[numVertices];
         for (int j = 0; j < numVertices; ++j) {
-            matrizAux[i][j] = matrizAdj[i][j];
+            novaMatriz[i][j] = matrizAdj[i][j];
         }
     }
-    for (int i = 0; i < numVertices; ++i) {
+
+    for (int i = 0; i < capacidade; ++i) {
         delete[] matrizAdj[i];
     }
     delete[] matrizAdj;
-    numVertices++;
-    inicializa_estrutura();
-    matrizAdj = matrizAux;
+
+    matrizAdj = novaMatriz;
+    capacidade = novaCapacidade;
 }
 
-void GrafoMatriz::remove_no(int id){
+void GrafoMatriz::adiciona_aresta(int origem, int destino, int peso) {
+    if (origem >= capacidade || destino >= capacidade) {
+        redimensionarMatriz(capacidade * 2);
+    }
+    matrizAdj[origem][destino] = peso;
+    if (!direcionado) {
+        matrizAdj[destino][origem] = peso;
+    }
+}
+
+void GrafoMatriz::adiciona_no() {
+    if (numVertices >= capacidade) {
+        redimensionarMatriz(capacidade * 2);
+    }
+    numVertices++;
+}
+
+void GrafoMatriz::remove_no(int id) {
     if (id < 0 || id >= numVertices) {
         std::cerr << "Erro: ID do nó inválido." << std::endl;
         return;
     }
-    int** matrizAux = new int*[numVertices - 1];
-    for (int i = 0; i < numVertices - 1; ++i) {
-        matrizAux[i] = new int[numVertices - 1];
-    }
-    for (int i = 0; i < numVertices; ++i) {
-        if (i == id) {
-            continue;
-        }
+
+    // Remove o nó e reorganiza os IDs
+    for (int i = id; i < numVertices - 1; ++i) {
         for (int j = 0; j < numVertices; ++j) {
-            if (j == id) {
-                continue;
-            }
-            matrizAux[i][j] = matrizAdj[i][j];
+            matrizAdj[i][j] = matrizAdj[i + 1][j]; // Move as linhas para cima
         }
     }
-    for (int i = 0; i < numVertices; ++i) {
-        delete[] matrizAdj[i];
+
+    for (int j = id; j < numVertices - 1; ++j) {
+        for (int i = 0; i < numVertices; ++i) {
+            matrizAdj[i][j] = matrizAdj[i][j + 1]; // Move as colunas para a esquerda
+        }
     }
-    delete[] matrizAdj;
+
+    // Atualiza o número de vértices
     numVertices--;
-    inicializa_estrutura();
-    matrizAdj = matrizAux;
+
+    // Preenche a última linha e coluna com zeros
+    for (int i = 0; i < numVertices; ++i) {
+        matrizAdj[i][numVertices] = 0;
+        matrizAdj[numVertices][i] = 0;
+    }
 }
 
 void GrafoMatriz::get_pesoAresta(int origem, int destino, int& peso) const {
     peso = matrizAdj[origem][destino];
-    
 }
-
 
 void GrafoMatriz::get_vizinhos(int v, int*& vizinhos, int& tamanho) const {
     tamanho = 0;

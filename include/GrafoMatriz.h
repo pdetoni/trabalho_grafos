@@ -1,7 +1,7 @@
 #ifndef GRAFOMATRIZ_H
 #define GRAFOMATRIZ_H
 
-#include "Grafo.h" // Inclua o cabeçalho base da classe Grafo
+#include "Grafo.h"
 #include <iostream>
 #include <fstream>
 #include <string>
@@ -9,6 +9,9 @@
 class GrafoMatriz : public Grafo {
 private:
     int** matrizAdj;
+    int capacidade;  // Capacidade atual da matriz
+
+    void redimensionarMatriz(int novaCapacidade);
 
 protected:
     void inicializa_estrutura() override;
@@ -16,17 +19,17 @@ protected:
     void get_pesoAresta(int origem, int destino, int& peso) const override;
     void adiciona_no() override;
     void remove_no(int id) override;
+
 public:
     GrafoMatriz(int n, bool dir = false, bool vp = false, bool ap = false);
     ~GrafoMatriz();
 
-    //void carrega_grafo(const std::string& arquivo) override;
     void get_vizinhos(int v, int*& vizinhos, int& tamanho) const override;
     void get_arestas(int*& arestas, int& tamanho) override;
-    //int n_conexo() override;
-   // int get_grau_vertice(int v) const override;
-   // bool eh_completo() override;
     bool existeAresta(int u, int v) const override;
+
+    // Nova função para mostrar a capacidade atual da matriz
+    int get_capacidade() const;
 };
 
 #endif // GRAFOMATRIZ_H
