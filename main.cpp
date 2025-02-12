@@ -49,15 +49,19 @@ int main(int argc, char* argv[]) {
     }
 
     grafo->carrega_grafo(arquivo);
-    imprimirDescricao(grafo);
+    
 
     // Exemplo de uso das novas funções
     grafo->novo_no();
     grafo->nova_aresta(0, 1, 5);
-    grafo->deleta_no(2);
+    imprimirDescricao(grafo); 
+
+    grafo->deleta_no(0);
     grafo->deleta_aresta(0, 1);
-    double distancia = grafo->menor_distancia(0, 3);
-    std::cout << "Menor distância entre 0 e 3: " << distancia << std::endl;
+    imprimirDescricao(grafo); 
+    int distancia = grafo->menor_distancia(2, 1);
+    std::cout << "Menor distância entre 2 e 1: " << distancia << std::endl;
+    
 
     delete grafo;
     return 0;

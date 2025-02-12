@@ -1,0 +1,1 @@
+/usr/bin/c++ CMakeFiles/test10.dir/tests/test10.cpp.o CMakeFiles/test10.dir/Grafo.cpp.o CMakeFiles/test10.dir/GrafoLista.cpp.o CMakeFiles/test10.dir/GrafoMatriz.cpp.o -o test10 

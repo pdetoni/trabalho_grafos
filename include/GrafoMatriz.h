@@ -13,6 +13,9 @@ private:
 protected:
     void inicializa_estrutura() override;
     void adiciona_aresta(int origem, int destino, int peso) override;   
+    void get_pesoAresta(int origem, int destino, int& peso) const override;
+    void adiciona_no() override;
+    void remove_no(int id) override;
 public:
     GrafoMatriz(int n, bool dir = false, bool vp = false, bool ap = false);
     ~GrafoMatriz();

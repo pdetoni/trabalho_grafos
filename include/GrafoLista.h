@@ -25,10 +25,13 @@ private:
 protected:
     void inicializa_estrutura() override;
     void adiciona_aresta(int origem, int destino, int peso) override;
+    void adiciona_no() override;
+    void remove_no(int id) override;
+    void get_pesoAresta(int origem, int destino, int& peso) const override;
 public:
     GrafoLista(int n, bool dir = false, bool vp = false, bool ap = false);
     ~GrafoLista();
-
+    Vertice* aux;
     //void carrega_grafo(const std::string& arquivo) override;
     void get_vizinhos(int v, int*& vizinhos, int& tamanho) const override;
     void get_arestas(int*& arestas, int& tamanho) override;

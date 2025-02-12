@@ -37,6 +37,57 @@ void GrafoMatriz::adiciona_aresta(int origem, int destino, int peso){
 
 
 
+void GrafoMatriz::adiciona_no(){
+    int** matrizAux = new int*[numVertices + 1];
+    for (int i = 0; i < numVertices; ++i) {
+        matrizAux[i] = new int[numVertices];
+        for (int j = 0; j < numVertices; ++j) {
+            matrizAux[i][j] = matrizAdj[i][j];
+        }
+    }
+    for (int i = 0; i < numVertices; ++i) {
+        delete[] matrizAdj[i];
+    }
+    delete[] matrizAdj;
+    numVertices++;
+    inicializa_estrutura();
+    matrizAdj = matrizAux;
+}
+
+void GrafoMatriz::remove_no(int id){
+    if (id < 0 || id >= numVertices) {
+        std::cerr << "Erro: ID do nó inválido." << std::endl;
+        return;
+    }
+    int** matrizAux = new int*[numVertices - 1];
+    for (int i = 0; i < numVertices - 1; ++i) {
+        matrizAux[i] = new int[numVertices - 1];
+    }
+    for (int i = 0; i < numVertices; ++i) {
+        if (i == id) {
+            continue;
+        }
+        for (int j = 0; j < numVertices; ++j) {
+            if (j == id) {
+                continue;
+            }
+            matrizAux[i][j] = matrizAdj[i][j];
+        }
+    }
+    for (int i = 0; i < numVertices; ++i) {
+        delete[] matrizAdj[i];
+    }
+    delete[] matrizAdj;
+    numVertices--;
+    inicializa_estrutura();
+    matrizAdj = matrizAux;
+}
+
+void GrafoMatriz::get_pesoAresta(int origem, int destino, int& peso) const {
+    peso = matrizAdj[origem][destino];
+    
+}
+
 
 void GrafoMatriz::get_vizinhos(int v, int*& vizinhos, int& tamanho) const {
     tamanho = 0;

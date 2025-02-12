@@ -34,6 +34,35 @@ void GrafoLista::adiciona_aresta(int origem, int destino, int peso) {
     vertices[origem].arestas = novaAresta;
 }
 
+void GrafoLista::adiciona_no() {
+    aux = new Vertice[numVertices + 1];
+    for (int i = 0; i < numVertices; ++i) {
+        aux[i] = vertices[i];
+    }
+    numVertices++;
+    delete[] vertices;
+    inicializa_estrutura();
+    vertices = aux;
+}
+
+void GrafoLista::remove_no(int id) {    
+    for (int i = id; i < numVertices - 1; ++i) {        
+        vertices[i] = vertices[i + 1];
+    }
+    numVertices--;
+    
+}
+
+void GrafoLista::get_pesoAresta(int origem, int destino, int& peso) const {
+    Aresta* aresta = vertices[origem].arestas;
+    while (aresta) {
+        if (aresta->destino == destino) {
+            peso = aresta->peso;
+        }
+        aresta = aresta->proxima;
+    }
+}
+
 void GrafoLista::get_vizinhos(int v, int*& vizinhos, int& tamanho) const {
     tamanho = 0;
     Aresta* aresta = vertices[v].arestas;

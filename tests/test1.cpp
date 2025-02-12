@@ -11,6 +11,7 @@ void verificaDescricao(Grafo* grafo) {
     assert(grafo->vertice_ponderado() == true);
     assert(grafo->aresta_ponderada() == true);
     assert(grafo->eh_completo() == false);
+    assert(grafo->menor_distancia(0, 2) == 1);
 }
 
 int main() {

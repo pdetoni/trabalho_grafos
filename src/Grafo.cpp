@@ -155,9 +155,10 @@ int Grafo::get_grau() {
 
 // Adiciona um novo nó ao grafo
 void Grafo::novo_no() {
-    numVertices++;
-    inicializa_estrutura(); // Reconfigura a estrutura para o novo tamanho
+    adiciona_no();
+    
 }
+
 
 // Adiciona uma nova aresta ao grafo
 void Grafo::nova_aresta(int origem, int destino, int peso) {
@@ -178,7 +179,7 @@ void Grafo::deleta_no(int id) {
     }
 
     // Reorganiza os IDs dos nós
-    numVertices--;
+    remove_no(id);
 }
 
 // Remove uma aresta do grafo
@@ -193,23 +194,23 @@ void Grafo::deleta_aresta(int origem, int destino) {
 }
 
 // Calcula a menor distância entre dois nós
-double Grafo::menor_distancia(int u, int v) {
+int Grafo::menor_distancia(int u, int v) {
     return menor_distancia_dijkstra(u, v);
 }
 
 // Função auxiliar para calcular a menor distância usando Dijkstra
-double Grafo::menor_distancia_dijkstra(int u, int v) {
-    double* dist = new double[numVertices];
+int Grafo::menor_distancia_dijkstra(int u, int v) {
+    int* dist = new int[numVertices];
     bool* visitado = new bool[numVertices]();
     for (int i = 0; i < numVertices; ++i) {
-        dist[i] = std::numeric_limits<double>::max();
+        dist[i] = std::numeric_limits<int>::max();
     }
 
     dist[u] = 0;
 
     while (true) {
         int atual = -1;
-        double menorDistancia = std::numeric_limits<double>::max();
+        int menorDistancia = std::numeric_limits<int>::max();
 
         // Encontra o nó não visitado com a menor distância
         for (int i = 0; i < numVertices; ++i) {
@@ -224,27 +225,28 @@ double Grafo::menor_distancia_dijkstra(int u, int v) {
         }
 
         visitado[atual] = true;
-
         int* vizinhos;
         int tamanho;
         get_vizinhos(atual, vizinhos, tamanho);
 
         for (int i = 0; i < tamanho; ++i) {
             int vizinho = vizinhos[i];
-            double pesoAresta = 0;
+            int pesoAresta = 1;
             if (arestasPonderadas) {
-                pesoAresta = 1; // Substitua por get_peso_aresta(atual, vizinho) se existir
+                get_pesoAresta(atual, vizinho, pesoAresta);
+                
             }
-            double novaDistancia = dist[atual] + pesoAresta;
+            int novaDistancia = dist[atual] + pesoAresta;
             if (novaDistancia < dist[vizinho]) {
                 dist[vizinho] = novaDistancia;
-            }
+                
+            } 
         }
 
         delete[] vizinhos;
     }
 
-    double resultado = dist[v];
+    int resultado = dist[v];
     delete[] dist;
     delete[] visitado;
     return resultado;

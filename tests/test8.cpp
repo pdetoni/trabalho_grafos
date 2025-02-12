@@ -11,6 +11,9 @@ void verificaDescricao(Grafo* grafo) {
     assert(grafo->vertice_ponderado() == false);
     assert(grafo->aresta_ponderada() == true);
     assert(grafo->eh_completo() == false);
+    assert(grafo->menor_distancia(2, 1) == -20);
+    
+
 }
 
 int main() {
@@ -36,6 +39,7 @@ int main() {
 
     verificaDescricao(grafoMatriz);
     verificaDescricao(grafoLista);
+  
 
     delete grafoMatriz;
     delete grafoLista;
