@@ -35,8 +35,8 @@ def gerar_instancia_tsp(num_nos, ponderado_arestas=False):
     arestas = criar_ciclo_inicial()
 
     print("Adicionando arestas extras...")
-    max_arestas_por_no = min(num_nos // 15, 5)  # Número máximo de arestas extras por nó
-    max_distancia = min(num_nos // 12, 7)  # Distância máxima entre nós para adicionar arestas
+    max_arestas_por_no = max(1, min(num_nos // 15, 5))  # Número máximo de arestas extras por nó. (mínimo 1, máximo 5)
+    max_distancia = max(2, min(num_nos // 12, 7))  # Distância máxima entre nós para adicionar arestas. (mínimo 2, máximo 7)
 
     ### Adicionar arestas extras
     # Adiciona um núemro de aleatório de arestas extras para cada nó dentro da distância máxima simulando cidades próximas com caminhos alternativos
