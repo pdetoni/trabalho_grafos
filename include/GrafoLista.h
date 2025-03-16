@@ -27,7 +27,7 @@ protected:
     void adiciona_aresta(int origem, int destino, int peso) override;
     void adiciona_no() override;
     void remove_no(int id) override;
-    void get_pesoAresta(int origem, int destino, int& peso) const override;
+    // void get_pesoAresta(int origem, int destino, int& peso) const override;
 public:
     GrafoLista(int n, bool dir = false, bool vp = false, bool ap = false);
     ~GrafoLista();
@@ -40,6 +40,10 @@ public:
    // bool eh_completo() override;
     bool existeAresta(int u, int v) const override;
     //int get_grau_vertice(int v) const override;
+    void get_pesoAresta(int origem, int destino, int& peso) const override;
+
+    void caixeiro_viajante_guloso_lista(int vertice_inicial, int*& caminho, int& tamanho_caminho);
+
 };
 
 #endif // GRAFOLISTA_H

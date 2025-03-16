@@ -251,3 +251,80 @@ int Grafo::menor_distancia_dijkstra(int u, int v) {
     delete[] visitado;
     return resultado;
 }
+
+void Grafo::caixeiro_viajante_guloso(int vertice_inicial, int*& caminho, int& tamanho_caminho) {
+    bool* visitado = new bool[numVertices]();  // Inicializa com false
+    int* caminho_temp = new int[numVertices + 1];  // +1 para o possível retorno ao início
+    
+    int atual = vertice_inicial;
+    caminho_temp[0] = atual;
+    visitado[atual] = true;
+    int contador = 1;
+    
+    // Enquanto não visitamos todos os vértices
+    for (int i = 1; i < numVertices; i++) {
+        int melhor_vizinho = -1;
+        int menor_peso = std::numeric_limits<int>::max();
+        
+        // Pega todos os vizinhos do vértice atual
+        int* vizinhos;
+        int num_vizinhos;
+        get_vizinhos(atual, vizinhos, num_vizinhos);
+        
+        // Encontra o vizinho não visitado com menor peso
+        for (int j = 0; j < num_vizinhos; j++) {
+            int vizinho = vizinhos[j];
+            if (!visitado[vizinho]) {
+                int peso = 1;
+                if (arestasPonderadas) {
+                    get_pesoAresta(atual, vizinho, peso);
+                }
+                
+                if (peso < menor_peso) {
+                    menor_peso = peso;
+                    melhor_vizinho = vizinho;
+                }
+            }
+        }
+        
+        // Libera a memória dos vizinhos
+        delete[] vizinhos;
+        
+        // Se não encontrou mais vizinhos, vamos verificar se podemos voltar ao início
+        if (melhor_vizinho == -1) {
+            // Se não há conexão direta com todos os vértices, tenta encontrar qualquer não visitado
+            for (int v = 0; v < numVertices; v++) {
+                if (!visitado[v]) {
+                    melhor_vizinho = v;
+                    break;
+                }
+            }
+            
+            // Se ainda não encontrou, significa que visitamos todos os vértices acessíveis
+            if (melhor_vizinho == -1) {
+                break;
+            }
+        }
+        
+        // Adiciona o melhor vizinho ao caminho
+        atual = melhor_vizinho;
+        caminho_temp[contador++] = atual;
+        visitado[atual] = true;
+    }
+    
+    // Tenta completar o ciclo voltando ao vértice inicial
+    if (existeAresta(atual, vertice_inicial)) {
+        caminho_temp[contador++] = vertice_inicial;
+    }
+    
+    // Copia o caminho para o array de resultado
+    tamanho_caminho = contador;
+    caminho = new int[tamanho_caminho];
+    for (int i = 0; i < tamanho_caminho; i++) {
+        caminho[i] = caminho_temp[i];
+    }
+    
+    // Libera a memória temporária
+    delete[] caminho_temp;
+    delete[] visitado;
+}

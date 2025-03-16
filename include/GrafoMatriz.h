@@ -16,7 +16,7 @@ private:
 protected:
     void inicializa_estrutura() override;
     void adiciona_aresta(int origem, int destino, int peso) override;   
-    void get_pesoAresta(int origem, int destino, int& peso) const override;
+    // void get_pesoAresta(int origem, int destino, int& peso) const override;
     void adiciona_no() override;
     void remove_no(int id) override;
 
@@ -27,9 +27,12 @@ public:
     void get_vizinhos(int v, int*& vizinhos, int& tamanho) const override;
     void get_arestas(int*& arestas, int& tamanho) override;
     bool existeAresta(int u, int v) const override;
+    void get_pesoAresta(int origem, int destino, int& peso) const override;
 
     // Nova função para mostrar a capacidade atual da matriz
     int get_capacidade() const;
+
+    void caixeiro_viajante_guloso_matriz(int vertice_inicial, int*& caminho, int& tamanho_caminho);
 };
 
 #endif // GRAFOMATRIZ_H

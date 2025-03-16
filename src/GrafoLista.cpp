@@ -112,3 +112,75 @@ bool GrafoLista::existeAresta(int u, int v) const {
     }
     return false;
 }
+
+void GrafoLista::caixeiro_viajante_guloso_lista(int vertice_inicial, int*& caminho, int& tamanho_caminho) {
+    bool* visitado = new bool[numVertices]();
+    int* caminho_temp = new int[numVertices + 1];
+    
+    int atual = vertice_inicial;
+    caminho_temp[0] = atual;
+    visitado[atual] = true;
+    int contador = 1;
+    
+    // Enquanto não visitamos todos os vértices
+    for (int i = 1; i < numVertices; i++) {
+        int melhor_vizinho = -1;
+        int menor_peso = std::numeric_limits<int>::max();
+        
+        // Percorre a lista de adjacência para encontrar o vizinho não visitado com menor peso
+        Aresta* aresta = vertices[atual].arestas;
+        while (aresta) {
+            int vizinho = aresta->destino;
+            if (!visitado[vizinho]) {
+                int peso = aresta->peso;
+                if (peso < menor_peso) {
+                    menor_peso = peso;
+                    melhor_vizinho = vizinho;
+                }
+            }
+            aresta = aresta->proxima;
+        }
+        
+        // Se não encontrou mais vizinhos, busca qualquer vértice não visitado
+        if (melhor_vizinho == -1) {
+            for (int v = 0; v < numVertices; v++) {
+                if (!visitado[v]) {
+                    melhor_vizinho = v;
+                    break;
+                }
+            }
+            
+            if (melhor_vizinho == -1) {
+                break;
+            }
+        }
+        
+        // Adiciona o melhor vizinho ao caminho
+        atual = melhor_vizinho;
+        caminho_temp[contador++] = atual;
+        visitado[atual] = true;
+    }
+    
+    // Tenta completar o ciclo voltando ao vértice inicial
+    Aresta* aresta = vertices[atual].arestas;
+    bool ciclo_fechado = false;
+    while (aresta) {
+        if (aresta->destino == vertice_inicial) {
+            caminho_temp[contador++] = vertice_inicial;
+            ciclo_fechado = true;
+            break;
+        }
+        aresta = aresta->proxima;
+    }
+    
+    // Copia o caminho para o array de resultado
+    tamanho_caminho = contador;
+    caminho = new int[tamanho_caminho];
+    for (int i = 0; i < tamanho_caminho; i++) {
+        caminho[i] = caminho_temp[i];
+    }
+    
+    // Libera a memória temporária
+    delete[] caminho_temp;
+    delete[] visitado;
+}

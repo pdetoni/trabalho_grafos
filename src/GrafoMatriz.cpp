@@ -135,3 +135,65 @@ void GrafoMatriz::get_arestas(int*& arestas, int& tamanho) {
 bool GrafoMatriz::existeAresta(int u, int v) const {
     return matrizAdj[u][v] != 0;
 }
+
+void GrafoMatriz::caixeiro_viajante_guloso_matriz(int vertice_inicial, int*& caminho, int& tamanho_caminho) {
+    bool* visitado = new bool[numVertices]();
+    int* caminho_temp = new int[numVertices + 1];
+    
+    int atual = vertice_inicial;
+    caminho_temp[0] = atual;
+    visitado[atual] = true;
+    int contador = 1;
+    
+    // Enquanto não visitamos todos os vértices
+    for (int i = 1; i < numVertices; i++) {
+        int melhor_vizinho = -1;
+        int menor_peso = std::numeric_limits<int>::max();
+        
+        // Percorre a linha da matriz para encontrar o vizinho não visitado com menor peso
+        for (int j = 0; j < numVertices; j++) {
+            if (matrizAdj[atual][j] > 0 && !visitado[j]) {
+                int peso = matrizAdj[atual][j];
+                if (peso < menor_peso) {
+                    menor_peso = peso;
+                    melhor_vizinho = j;
+                }
+            }
+        }
+        
+        // Se não encontrou mais vizinhos, busca qualquer vértice não visitado
+        if (melhor_vizinho == -1) {
+            for (int v = 0; v < numVertices; v++) {
+                if (!visitado[v]) {
+                    melhor_vizinho = v;
+                    break;
+                }
+            }
+            
+            if (melhor_vizinho == -1) {
+                break;
+            }
+        }
+        
+        // Adiciona o melhor vizinho ao caminho
+        atual = melhor_vizinho;
+        caminho_temp[contador++] = atual;
+        visitado[atual] = true;
+    }
+    
+    // Tenta completar o ciclo voltando ao vértice inicial
+    if (matrizAdj[atual][vertice_inicial] > 0) {
+        caminho_temp[contador++] = vertice_inicial;
+    }
+    
+    // Copia o caminho para o array de resultado
+    tamanho_caminho = contador;
+    caminho = new int[tamanho_caminho];
+    for (int i = 0; i < tamanho_caminho; i++) {
+        caminho[i] = caminho_temp[i];
+    }
+    
+    // Libera a memória temporária
+    delete[] caminho_temp;
+    delete[] visitado;
+}

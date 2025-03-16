@@ -16,7 +16,7 @@ protected:
     // Funções auxiliares para DFS e cálculo de distância
     void dfs(int u, bool* visitado);
     int menor_distancia_dijkstra(int u, int v);
-    virtual void get_pesoAresta(int origem, int destino, int& peso) const = 0;
+    // virtual void get_pesoAresta(int origem, int destino, int& peso) const = 0;
 public:
     // Construtor
     Grafo(int n, bool dir = false, bool vp = false, bool ap = false);
@@ -49,6 +49,9 @@ public:
     virtual void deleta_no(int id);
     virtual void deleta_aresta(int origem, int destino);
     int menor_distancia(int u, int v); // Calcula a menor distância entre dois nós
+    virtual void get_pesoAresta(int origem, int destino, int& peso) const = 0;
+
+    void caixeiro_viajante_guloso(int vertice_inicial, int*& caminho, int& tamanho_caminho);
 };
 
 #endif // GRAFO_H
