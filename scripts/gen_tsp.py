@@ -5,6 +5,36 @@ try:
 except ImportError:
     HAS_TQDM = False
 
+def calcular_distancia(grafo, origem, destino):
+    """
+    Função para calcular a distância real entre dois nós usando Dijkstra.
+    Assume que o grafo é representado como um dicionário de adjacência.
+    """
+    distancias = {no: float('inf') for no in grafo}
+    distancias[origem] = 0
+    visitados = set()
+
+    while True:
+        # Encontra o nó não visitado com a menor distância
+        no_atual = None
+        menor_distancia = float('inf')
+        for no in grafo:
+            if no not in visitados and distancias[no] < menor_distancia:
+                no_atual = no
+                menor_distancia = distancias[no]
+
+        if no_atual is None or no_atual == destino:
+            break
+
+        visitados.add(no_atual)
+
+        # Atualiza as distâncias dos vizinhos
+        for vizinho, peso in grafo[no_atual].items():
+            if distancias[no_atual] + peso < distancias[vizinho]:
+                distancias[vizinho] = distancias[no_atual] + peso
+
+    return distancias[destino]
+
 def gerar_instancia_tsp(num_nos, ponderado_arestas=False):
     if num_nos < 3:
         raise ValueError("O número de nós deve ser pelo menos 3 para formar um ciclo.")
@@ -34,25 +64,50 @@ def gerar_instancia_tsp(num_nos, ponderado_arestas=False):
     
     arestas = criar_ciclo_inicial()
 
+    # Construir o grafo como um dicionário de adjacência para calcular distâncias
+    grafo = {no: {} for no in range(1, num_nos + 1)}
+    for aresta in arestas:
+        origem, destino, peso = aresta
+        grafo[origem][destino] = peso
+        if not ponderado_arestas:
+            grafo[destino][origem] = peso  # Se não for ponderado, assume-se que é bidirecional
+
     print("Adicionando arestas extras...")
     max_arestas_por_no = max(1, min(num_nos // 15, 5))  # Número máximo de arestas extras por nó. (mínimo 1, máximo 5)
     max_distancia = max(2, min(num_nos // 12, 7))  # Distância máxima entre nós para adicionar arestas. (mínimo 2, máximo 7)
+    
+    print(f"Número máximo de arestas extras por nó: {max_arestas_por_no}")
+    print(f"Distância máxima para adicionar arestas extras: {max_distancia}")
 
     ### Adicionar arestas extras
-    # Adiciona um núemro de aleatório de arestas extras para cada nó dentro da distância máxima simulando cidades próximas com caminhos alternativos
+    # Adiciona um número aleatório de arestas extras para cada nó dentro da distância máxima
     iteravel = range(1, num_nos + 1)
     if HAS_TQDM:
         iteravel = tqdm(iteravel, desc="Adicionando arestas extras")
     for no in iteravel:
-        num_arestas_extras = random.randint(0, max_arestas_por_no)  # Número aleatório de arestas extras
+        num_arestas_extras = random.randint(1, max_arestas_por_no)  # Pelo menos 1 aresta extra
         tentativas = 0
         while num_arestas_extras > 0 and tentativas < 15:
-            # Escolher um nó destino dentro da distância máxima
-            destino = random.randint(max(1, no - max_distancia), min(num_nos, no + max_distancia))
+            # Escolher um nó destino aleatório
+            destino = random.randint(1, num_nos)
             if destino != no and not aresta_existe(no, destino, arestas):
-                peso = random.randint(1, 10) if ponderado_arestas else 1
-                arestas.append((no, destino, peso))
-                num_arestas_extras -= 1
+                # Calcular a distância real entre os nós
+                distancia = calcular_distancia(grafo, no, destino)
+                if distancia <= max_distancia:
+                    peso = random.randint(1, 10) if ponderado_arestas else 1
+                    arestas.append((no, destino, peso))
+                    grafo[no][destino] = peso  # Atualiza o grafo com a nova aresta
+                    if not ponderado_arestas:
+                        grafo[destino][no] = peso  # Se não for ponderado, assume-se que é bidirecional
+                    num_arestas_extras -= 1
+                else:
+                    # Se a distância for maior que o máximo, relaxa a restrição e adiciona a aresta
+                    peso = random.randint(1, 10) if ponderado_arestas else 1
+                    arestas.append((no, destino, peso))
+                    grafo[no][destino] = peso
+                    if not ponderado_arestas:
+                        grafo[destino][no] = peso
+                    num_arestas_extras -= 1
             tentativas += 1
 
     # Gerar o arquivo de saída

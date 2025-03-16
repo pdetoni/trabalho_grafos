@@ -51,18 +51,25 @@ int main(int argc, char* argv[]) {
     grafo->carrega_grafo(arquivo);
     
 
-    // Exemplo de uso das novas funções
-    grafo->novo_no();
-    grafo->nova_aresta(0, 1, 5);
+    // Define o vértice inicial
+    int vertice_inicial = 0;
 
-    // grafo->deleta_no(0);
-    // grafo->deleta_aresta(0, 1);
+    // Variáveis para armazenar o caminho e o tamanho do caminho
+    int* caminho = nullptr;
+    int tamanho_caminho = 0;
 
-    int distancia = grafo->menor_distancia(2, 1);
-    imprimirDescricao(grafo); 
-    std::cout << "Menor distância entre 2 e 1: " << distancia << std::endl;
-    
+    // Chama a função caixeiro_viajante_guloso
+    grafo->caixeiro_viajante_guloso(vertice_inicial, caminho, tamanho_caminho);
 
-    delete grafo;
+    // Imprime o caminho encontrado
+    std::cout << "Caminho encontrado pelo caixeiro viajante guloso: ";
+    for (int i = 0; i < tamanho_caminho; ++i) {
+        std::cout << (caminho[i] + 1) << " "; // Incrementa o valor do nó ao imprimir
+    }
+    std::cout << std::endl;
+
+    // Libera a memória alocada para o caminho
+    delete[] caminho;
+
     return 0;
 }
