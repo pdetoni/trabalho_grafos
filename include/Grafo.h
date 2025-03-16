@@ -5,6 +5,9 @@
 #include <limits>
 #include <iostream>
 #include <fstream>
+#include <cstdlib>
+#include <ctime>
+#include <cmath>
 
 class Grafo {
 protected:
@@ -16,7 +19,9 @@ protected:
     // Funções auxiliares para DFS e cálculo de distância
     void dfs(int u, bool* visitado);
     int menor_distancia_dijkstra(int u, int v);
-    virtual void get_pesoAresta(int origem, int destino, int& peso) const = 0;
+    
+    virtual void get_pesoAresta(int origem, int destino, int &peso) const = 0;
+
 public:
     // Construtor
     Grafo(int n, bool dir = false, bool vp = false, bool ap = false);
@@ -42,6 +47,9 @@ public:
     bool eh_completo() const; // Verifica se o grafo é completo
     int get_grau();          // Retorna o grau máximo do grafo
     void carrega_grafo(const std::string& arquivo); // Carrega o grafo de um arquivo
+    void ordenarCandidatos(int *pesos, int *destinos, int n);
+    int *tspGulosoRandomizado(const Grafo *grafo, int k, int &tamanhoCiclo);
+    int calcularCustoCiclo(const Grafo *grafo, const int *ciclo, int tamanho);
 
     // Novas funções
     virtual void novo_no();

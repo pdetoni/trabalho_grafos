@@ -251,3 +251,124 @@ int Grafo::menor_distancia_dijkstra(int u, int v) {
     delete[] visitado;
     return resultado;
 }
+
+void Grafo::ordenarCandidatos(int* pesos, int* destinos, int n) {
+    for (int i = 0; i < n - 1; i++) {
+        for (int j = 0; j < n - i - 1; j++) {
+            if (pesos[j] > pesos[j + 1]) {
+                int tempPeso = pesos[j];
+                pesos[j] = pesos[j + 1];
+                pesos[j + 1] = tempPeso;
+
+                int tempDestino = destinos[j];
+                destinos[j] = destinos[j + 1];
+                destinos[j + 1] = tempDestino;
+            }
+        }
+    }
+}
+
+
+
+int* Grafo::tspGulosoRandomizado(const Grafo* grafo, int k, int& tamanhoCiclo) {
+    int n = get_ordem();
+    int* ciclo = new int[n + 1];
+    bool* visitado = new bool[n]();
+    srand(time(nullptr));
+
+    // Passo 1: Escolher vértice inicial aleatoriamente
+    int inicio = rand() % n;
+    ciclo[0] = inicio;
+    visitado[inicio] = true;
+    tamanhoCiclo = 1;
+
+    // Passo 2: Construir o ciclo
+    while (tamanhoCiclo < n) {
+        int atual = ciclo[tamanhoCiclo - 1];
+        int* vizinhos = new int[n];
+        int numVizinhos = 0;
+        get_vizinhos(atual, vizinhos, numVizinhos);
+
+        if (numVizinhos == 0) {
+            delete[] vizinhos;
+            break;
+        }
+
+        int* candidatosPesos = new int[numVizinhos];
+        int* candidatosDestinos = new int[numVizinhos];
+        int numCandidatos = 0;
+
+        // Coletar vizinhos não visitados
+        for (int i = 0; i < numVizinhos; i++) {
+            if (!visitado[vizinhos[i]]) {
+                int peso = 1;
+                get_pesoAresta(atual, vizinhos[i], peso);
+                if (peso > 0) {
+                    candidatosPesos[numCandidatos] = peso;
+                    candidatosDestinos[numCandidatos] = vizinhos[i];
+                    numCandidatos++;
+                }
+            }
+        }
+
+        delete[] vizinhos;
+
+        if (numCandidatos == 0) {
+            delete[] candidatosPesos;
+            delete[] candidatosDestinos;
+            break;
+        }
+
+        // Ordenar candidatos por peso
+        ordenarCandidatos(candidatosPesos, candidatosDestinos, numCandidatos);
+
+        // Selecionar os k menores
+        int limite = k;
+        if (numCandidatos < k) {
+            limite = numCandidatos;
+        }
+
+        double somaInversos = 0.0;
+        for (int i = 0; i < limite; i++) {
+            somaInversos += 1.0 / candidatosPesos[i];
+        }
+
+        // Escolher aleatoriamente com probabilidade inversa ao peso
+        double r = (double)rand() / RAND_MAX * somaInversos;
+        int escolhido = 0;
+        double acumulado = 0.0;
+        for (int i = 0; i < limite; i++) {
+            acumulado += 1.0 / candidatosPesos[i];
+            if (r <= acumulado) {
+                escolhido = i;
+                break;
+            }
+        }
+
+        int proximo = candidatosDestinos[escolhido];
+        ciclo[tamanhoCiclo++] = proximo;
+        visitado[proximo] = true;
+
+        delete[] candidatosPesos;
+        delete[] candidatosDestinos;
+    }
+
+    // Passo 3: Fechar o ciclo
+    ciclo[tamanhoCiclo++] = inicio;
+    delete[] visitado;
+    return ciclo;
+}
+
+int Grafo::calcularCustoCiclo(const Grafo* grafo, const int* ciclo, int tamanho) {
+    int custo = 0;
+    for (int i = 0; i < tamanho - 1; i++) {
+        int peso = 0;
+        get_pesoAresta(ciclo[i], ciclo[i + 1], peso);
+        custo += peso;
+    }
+    return custo;
+}
+
+
+
+
