@@ -1,33 +1,56 @@
 #include "../include/Grafo.h"
 
-// Construtor
+/**
+ * @brief Construtor da classe Grafo.
+ * @param n Numero de vertices.
+ * @param dir Indica se o grafo e direcionado.
+ * @param vp Indica se os vertices sao ponderados.
+ * @param ap Indica se as arestas sao ponderadas.
+ */
 Grafo::Grafo(int n, bool dir, bool vp, bool ap)
     : numVertices(n), direcionado(dir), verticesPonderados(vp), arestasPonderadas(ap) {}
 
-// Destrutor virtual
+/**
+ * @brief Destrutor virtual da classe Grafo.
+ */
 Grafo::~Grafo() {}
 
-// Retorna o número de vértices (ordem do grafo)
+/**
+ * @brief Retorna a ordem do grafo (numero de vertices).
+ * @return Numero de vertices do grafo.
+ */
 int Grafo::get_ordem() {
     return numVertices;
 }
 
-// Verifica se o grafo é direcionado
+/**
+ * @brief Verifica se o grafo e direcionado.
+ * @return true se for direcionado, false caso contrario.
+ */
 bool Grafo::eh_direcionado() {
     return direcionado;
 }
 
-// Verifica se os vértices são ponderados
+/**
+ * @brief Verifica se os vertices sao ponderados.
+ * @return true se os vertices forem ponderados, false caso contrario.
+ */
 bool Grafo::vertice_ponderado() {
     return verticesPonderados;
 }
 
-// Verifica se as arestas são ponderadas
+/**
+ * @brief Verifica se as arestas sao ponderadas.
+ * @return true se as arestas forem ponderadas, false caso contrario.
+ */
 bool Grafo::aresta_ponderada() {
     return arestasPonderadas;
 }
 
-// Verifica se o grafo é completo
+/**
+ * @brief Verifica se o grafo e completo.
+ * @return true se o grafo for completo, false caso contrario.
+ */
 bool Grafo::eh_completo() const {
     for (int i = 0; i < numVertices; ++i) {
         for (int j = 0; j < numVertices; ++j) {
@@ -39,7 +62,10 @@ bool Grafo::eh_completo() const {
     return true;
 }
 
-// Carrega o grafo de um arquivo
+/**
+ * @brief Carrega o grafo a partir de um arquivo.
+ * @param arquivo Nome do arquivo a ser carregado.
+ */
 void Grafo::carrega_grafo(const std::string& arquivo) {
     std::ifstream file(arquivo);
     if (!file.is_open()) {
@@ -93,7 +119,10 @@ void Grafo::carrega_grafo(const std::string& arquivo) {
     file.close();
 }
 
-// Retorna o número de componentes conexos
+/**
+ * @brief Retorna o numero de componentes conexos do grafo.
+ * @return Numero de componentes conexos.
+ */
 int Grafo::n_conexo() {
     bool* visitado = new bool[numVertices]();
     int componentes = 0;
@@ -109,7 +138,11 @@ int Grafo::n_conexo() {
     return componentes;
 }
 
-// Função auxiliar para DFS
+/**
+ * @brief Realiza uma busca em profundidade (DFS) no grafo.
+ * @param v Vertice inicial.
+ * @param visitado Vetor de vertices visitados.
+ */
 void Grafo::dfs(int v, bool* visitado) {
     visitado[v] = true;
 
@@ -127,7 +160,10 @@ void Grafo::dfs(int v, bool* visitado) {
     delete[] vizinhos;
 }
 
-// Retorna o grau máximo do grafo
+/**
+ * @brief Retorna o grau maximo do grafo.
+ * @return Grau maximo do grafo.
+ */
 int Grafo::get_grau() {
     int grauMax = 0;
     if (eh_direcionado()) {
@@ -153,19 +189,29 @@ int Grafo::get_grau() {
     return grauMax;
 }
 
-// Adiciona um novo nó ao grafo
+/**
+ * @brief Adiciona um novo vertice ao grafo.
+ */
 void Grafo::novo_no() {
     adiciona_no();
     
 }
 
 
-// Adiciona uma nova aresta ao grafo
+/**
+ * @brief Adiciona uma nova aresta ao grafo.
+ * @param origem Vertice de origem.
+ * @param destino Vertice de destino.
+ * @param peso Peso da aresta.
+ */
 void Grafo::nova_aresta(int origem, int destino, int peso) {
     adiciona_aresta(origem, destino, peso);
 }
 
-// Remove um nó do grafo
+/**
+ * @brief Remove um nó do grafo.
+ * @param id ID do nó a ser removido.
+ */
 void Grafo::deleta_no(int id) {
     if (id < 0 || id >= numVertices) {
         std::cerr << "Erro: ID do nó inválido." << std::endl;
@@ -182,7 +228,11 @@ void Grafo::deleta_no(int id) {
     remove_no(id);
 }
 
-// Remove uma aresta do grafo
+/**
+ * @brief Remove uma aresta do grafo.
+ * @param origem ID do nó de origem.
+ * @param destino ID do nó de destino.
+ */
 void Grafo::deleta_aresta(int origem, int destino) {
     if (origem < 0 || origem >= numVertices || destino < 0 || destino >= numVertices) {
         std::cerr << "Erro: IDs dos nós inválidos." << std::endl;
@@ -193,12 +243,22 @@ void Grafo::deleta_aresta(int origem, int destino) {
     adiciona_aresta(origem, destino, 0); // Define o peso como 0 (sem aresta)
 }
 
-// Calcula a menor distância entre dois nós
+/**
+ * @brief Calcula a menor distância entre dois nós.
+ * @param u Nó de origem.
+ * @param v Nó de destino.
+ * @return Distância mínima entre os nós.
+ */
 int Grafo::menor_distancia(int u, int v) {
     return menor_distancia_dijkstra(u, v);
 }
 
-// Função auxiliar para calcular a menor distância usando Dijkstra
+/**
+ * @brief Algoritmo de Dijkstra para encontrar a menor distância entre dois nós.
+ * @param u Nó de origem.
+ * @param v Nó de destino.
+ * @return Menor distância entre os nós.
+ */
 int Grafo::menor_distancia_dijkstra(int u, int v) {
     int* dist = new int[numVertices];
     bool* visitado = new bool[numVertices]();
@@ -252,6 +312,14 @@ int Grafo::menor_distancia_dijkstra(int u, int v) {
     return resultado;
 }
 
+/**
+ * @brief Algoritmo guloso para resolver o problema do Caixeiro Viajante.
+ * @param vertice_inicial Vértice de início.
+ * @param caminho Ponteiro para armazenar o caminho resultante.
+ * @param tamanho_caminho Referência para armazenar o tamanho do caminho.
+ * @param randomize Define se a escolha de vértices será aleatória.
+ * @param reativo Define se o algoritmo deve se adaptar a modificações no grafo.
+ */
 void Grafo::caixeiro_viajante_guloso(int vertice_inicial, int*& caminho, int& tamanho_caminho, bool randomize, bool reativo) {
     bool* visitado = new bool[numVertices]();  // Inicializa com false
     int* caminho_temp = new int[numVertices + 1];  // +1 para o possível retorno ao início
