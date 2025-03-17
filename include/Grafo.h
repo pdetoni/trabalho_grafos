@@ -52,6 +52,7 @@ public:
     virtual void deleta_aresta(int origem, int destino);
     int menor_distancia(int u, int v); // Calcula a menor distância entre dois nós
     void caixeiro_viajante_guloso(int vertice_inicial, int*& caminho, int& tamanho_caminho);
+    void caixeiro_viajante_guloso(int vertice_inicial, int*& caminho, int& tamanho_caminho, bool randomize = false);
 };
 
 #endif // GRAFO_H

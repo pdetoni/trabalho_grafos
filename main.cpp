@@ -58,8 +58,9 @@ int main(int argc, char* argv[]) {
     int* caminho = nullptr;
     int tamanho_caminho = 0;
 
+
     // Chama a função caixeiro_viajante_guloso
-    grafo->caixeiro_viajante_guloso(vertice_inicial, caminho, tamanho_caminho);
+    grafo->caixeiro_viajante_guloso(vertice_inicial, caminho, tamanho_caminho, true);
 
     // Imprime o caminho encontrado
     std::cout << "Caminho encontrado pelo caixeiro viajante guloso: ";
