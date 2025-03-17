@@ -1,39 +1,41 @@
-import argparse, random, os
+import argparse
+import random
+import os
+from collections import defaultdict, deque
+
 try:
     from tqdm import tqdm
     HAS_TQDM = True
 except ImportError:
     HAS_TQDM = False
 
-def calcular_distancia(grafo, origem, destino):
+def encontrar_nos_alcancaveis(grafo, origem, max_distancia):
     """
-    Função para calcular a distância real entre dois nós usando Dijkstra.
-    Assume que o grafo é representado como um dicionário de adjacência.
+    Encontra todos os nós alcançáveis a partir de um nó de origem, até uma profundidade máxima.
+    Retorna uma lista de nós alcançáveis.
     """
-    distancias = {no: float('inf') for no in grafo}
-    distancias[origem] = 0
     visitados = set()
+    fila = deque()
+    fila.append((origem, 0))  # (nó, profundidade)
+    visitados.add(origem)
 
-    while True:
-        # Encontra o nó não visitado com a menor distância
-        no_atual = None
-        menor_distancia = float('inf')
-        for no in grafo:
-            if no not in visitados and distancias[no] < menor_distancia:
-                no_atual = no
-                menor_distancia = distancias[no]
+    nos_alcancaveis = []
 
-        if no_atual is None or no_atual == destino:
-            break
+    while fila:
+        no_atual, profundidade = fila.popleft()
 
-        visitados.add(no_atual)
+        # Se a profundidade for maior que a distância máxima, paramos
+        if profundidade >= max_distancia:
+            continue
 
-        # Atualiza as distâncias dos vizinhos
-        for vizinho, peso in grafo[no_atual].items():
-            if distancias[no_atual] + peso < distancias[vizinho]:
-                distancias[vizinho] = distancias[no_atual] + peso
+        # Adiciona os vizinhos à fila
+        for vizinho in grafo[no_atual]:
+            if vizinho not in visitados:
+                visitados.add(vizinho)
+                fila.append((vizinho, profundidade + 1))
+                nos_alcancaveis.append(vizinho)
 
-    return distancias[destino]
+    return nos_alcancaveis
 
 def gerar_instancia_tsp(num_nos, ponderado_arestas=False):
     if num_nos < 3:
@@ -57,15 +59,19 @@ def gerar_instancia_tsp(num_nos, ponderado_arestas=False):
             arestas.append((origem, destino, peso))
         return arestas
 
+    # Usar um conjunto para armazenar arestas e verificar existência em O(1)
+    arestas_set = set()
+
     # Função para verificar se uma aresta já existe
-    def aresta_existe(origem, destino, arestas):
-        return (origem, destino) in [(a[0], a[1]) for a in arestas] or \
-                (destino, origem) in [(a[0], a[1]) for a in arestas]
+    def aresta_existe(origem, destino):
+        return (origem, destino) in arestas_set or (destino, origem) in arestas_set
     
     arestas = criar_ciclo_inicial()
+    for aresta in arestas:
+        arestas_set.add((aresta[0], aresta[1]))
 
-    # Construir o grafo como um dicionário de adjacência para calcular distâncias
-    grafo = {no: {} for no in range(1, num_nos + 1)}
+    # Construir o grafo como um dicionário de adjacência
+    grafo = defaultdict(dict)
     for aresta in arestas:
         origem, destino, peso = aresta
         grafo[origem][destino] = peso
@@ -87,32 +93,27 @@ def gerar_instancia_tsp(num_nos, ponderado_arestas=False):
     for no in iteravel:
         num_arestas_extras = random.randint(1, max_arestas_por_no)  # Pelo menos 1 aresta extra
         tentativas = 0
+
+        # Encontra todos os nós alcançáveis a partir do nó atual, até a distância máxima
+        nos_alcancaveis = encontrar_nos_alcancaveis(grafo, no, max_distancia)
+
         while num_arestas_extras > 0 and tentativas < 15:
-            # Escolher um nó destino aleatório
-            destino = random.randint(1, num_nos)
-            if destino != no and not aresta_existe(no, destino, arestas):
-                # Calcular a distância real entre os nós
-                distancia = calcular_distancia(grafo, no, destino)
-                if distancia <= max_distancia:
+            # Escolhe um nó aleatório da lista de nós alcançáveis
+            if nos_alcancaveis:
+                destino = random.choice(nos_alcancaveis)
+                if destino != no and not aresta_existe(no, destino):
                     peso = random.randint(1, 10) if ponderado_arestas else 1
                     arestas.append((no, destino, peso))
+                    arestas_set.add((no, destino))
                     grafo[no][destino] = peso  # Atualiza o grafo com a nova aresta
                     if not ponderado_arestas:
                         grafo[destino][no] = peso  # Se não for ponderado, assume-se que é bidirecional
-                    num_arestas_extras -= 1
-                else:
-                    # Se a distância for maior que o máximo, relaxa a restrição e adiciona a aresta
-                    peso = random.randint(1, 10) if ponderado_arestas else 1
-                    arestas.append((no, destino, peso))
-                    grafo[no][destino] = peso
-                    if not ponderado_arestas:
-                        grafo[destino][no] = peso
                     num_arestas_extras -= 1
             tentativas += 1
 
     # Gerar o arquivo de saída
     print("Salvando a instância em arquivo...")
-    base_nome = f"instancia_tsp_{num_nos}_nos"
+    base_nome = f"grafo_tsp_{num_nos}"
     sufixo = 0
     nome_arquivo = f"{base_nome}.txt"
     
