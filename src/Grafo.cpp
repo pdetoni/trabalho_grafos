@@ -252,7 +252,7 @@ int Grafo::menor_distancia_dijkstra(int u, int v) {
     return resultado;
 }
 
-void Grafo::caixeiro_viajante_guloso(int vertice_inicial, int*& caminho, int& tamanho_caminho, bool randomize) {
+void Grafo::caixeiro_viajante_guloso(int vertice_inicial, int*& caminho, int& tamanho_caminho, bool randomize, bool reativo) {
     bool* visitado = new bool[numVertices]();  // Inicializa com false
     int* caminho_temp = new int[numVertices + 1];  // +1 para o possível retorno ao início
     
@@ -265,6 +265,13 @@ void Grafo::caixeiro_viajante_guloso(int vertice_inicial, int*& caminho, int& ta
     if (randomize) {
         std::srand(std::time(0));  // Usa o tempo atual como semente
     }
+
+    // Variáveis para verificar mudanças no grafo
+    int numVerticesOriginal = numVertices;
+    int* arestas;
+    int numArestasOriginal;
+    get_arestas(arestas, numArestasOriginal);  // Função que retorna o número de arestas no grafo
+    delete[] arestas;
     
     // Enquanto não visitamos todos os vértices
     for (int i = 1; i < numVertices; i++) {
@@ -330,6 +337,33 @@ void Grafo::caixeiro_viajante_guloso(int vertice_inicial, int*& caminho, int& ta
         atual = melhor_vizinho;
         caminho_temp[contador++] = atual;
         visitado[atual] = true;
+
+        // Se o algoritmo for reativo, verifica se o grafo foi modificado
+        if (reativo) {
+            // Verifica se o número de nós ou arestas mudou
+            int numVerticesAtual = numVertices;
+            int numArestasAtual;
+            get_arestas(arestas, numArestasAtual);
+            delete[] arestas;
+
+            if (numVerticesAtual != numVerticesOriginal || numArestasAtual != numArestasOriginal) {
+                std::cout << "Grafo modificado! Reinicializando o caminho..." << std::endl;
+
+                // Reinicializa o caminho parcialmente
+                for (int v = 0; v < numVertices; v++) {
+                    visitado[v] = false;  // Marca todos os nós como não visitados
+                }
+
+                // Reinicia o caminho a partir do nó atual
+                caminho_temp[0] = atual;
+                visitado[atual] = true;
+                contador = 1;
+
+                // Atualiza as variáveis de controle
+                numVerticesOriginal = numVerticesAtual;
+                numArestasOriginal = numArestasAtual;
+            }
+        }
     }
     
     // Tenta completar o ciclo voltando ao vértice inicial

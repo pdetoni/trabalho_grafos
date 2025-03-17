@@ -60,7 +60,7 @@ int main(int argc, char* argv[]) {
 
 
     // Chama a função caixeiro_viajante_guloso
-    grafo->caixeiro_viajante_guloso(vertice_inicial, caminho, tamanho_caminho, true);
+    grafo->caixeiro_viajante_guloso(vertice_inicial, caminho, tamanho_caminho, true, true);
 
     // Imprime o caminho encontrado
     std::cout << "Caminho encontrado pelo caixeiro viajante guloso: ";
