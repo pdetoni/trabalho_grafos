@@ -1,4 +1,4 @@
-#include "Grafo.h"
+#include "../include/Grafo.h"
 
 // Construtor
 Grafo::Grafo(int n, bool dir, bool vp, bool ap)

@@ -1,5 +1,4 @@
-// ListaEncadeada.cpp
-#include "ListaEncadeada.h"
+#include "../include/ListaEncadeada.h"
 
 template <typename T>
 ListaEncadeada<T>::~ListaEncadeada() {
@@ -79,5 +78,3 @@ void ListaEncadeada<T>::imprimir() const {
     }
     std::cout << std::endl;
 }
-
-// Explicação: Como é um template, as definições dos métodos devem estar no mesmo arquivo .h ou ser explicitamente instanciadas no .cpp.

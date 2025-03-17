@@ -1,4 +1,4 @@
-#include "GrafoMatriz.h"
+#include "../include/GrafoMatriz.h"
 
 GrafoMatriz::GrafoMatriz(int n, bool dir, bool vp, bool ap)
     : Grafo(n, dir, vp, ap), capacidade(10) {

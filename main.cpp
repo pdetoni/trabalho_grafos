@@ -1,7 +1,8 @@
 #include <iostream>
 #include <string>
-#include "GrafoMatriz.h"
-#include "GrafoLista.h"
+#include <fstream>
+#include "./include/GrafoMatriz.h"
+#include "./include/GrafoLista.h"
 
 void imprimirDescricao(Grafo* grafo) {
     std::cout << "Grau: " << grafo->get_grau() << std::endl;
@@ -13,17 +14,25 @@ void imprimirDescricao(Grafo* grafo) {
 }
 
 int main(int argc, char* argv[]) {
-    if (argc < 4) {
-        std::cerr << "Uso: " << argv[0] << " -d (-m ou -l) arquivo.txt" << std::endl;
+    // Verifica o número de argumentos
+    if (argc != 4) {
+        std::cerr << "Uso: " << argv[0] << " -p (-m ou -l) arquivo.txt" << std::endl;
         return 1;
     }
 
-    std::string modo = argv[1];
-    std::string tipo = argv[2];
-    std::string arquivo = argv[3];
+    std::string modo = argv[1];  // -p
+    std::string tipo = argv[2];  // -m ou -l
+    std::string arquivo = argv[3];  // arquivo.txt
 
-    if (modo != "-d") {
-        std::cerr << "Modo inválido. Use -d." << std::endl;
+    // Verifica se o modo é válido
+    if (modo != "-p") {
+        std::cerr << "Modo inválido. Use -p." << std::endl;
+        return 1;
+    }
+
+    // Verifica se o tipo de grafo é válido
+    if (tipo != "-m" && tipo != "-l") {
+        std::cerr << "Tipo de grafo inválido. Use -m para matriz ou -l para lista." << std::endl;
         return 1;
     }
 
@@ -39,17 +48,15 @@ int main(int argc, char* argv[]) {
 
     Grafo* grafo = nullptr;
 
+    // Cria o grafo com base no tipo especificado
     if (tipo == "-m") {
         grafo = new GrafoMatriz(numVertices, direcionado, verticesPonderados, arestasPonderadas);
     } else if (tipo == "-l") {
         grafo = new GrafoLista(numVertices, direcionado, verticesPonderados, arestasPonderadas);
-    } else {
-        std::cerr << "Tipo de grafo inválido. Use -m para matriz ou -l para lista." << std::endl;
-        return 1;
     }
 
+    // Carrega o grafo a partir do arquivo
     grafo->carrega_grafo(arquivo);
-    
 
     // Define o vértice inicial
     int vertice_inicial = 0;
@@ -58,19 +65,21 @@ int main(int argc, char* argv[]) {
     int* caminho = nullptr;
     int tamanho_caminho = 0;
 
-
     // Chama a função caixeiro_viajante_guloso
-    grafo->caixeiro_viajante_guloso(vertice_inicial, caminho, tamanho_caminho, true, true);
+    grafo->caixeiro_viajante_guloso(vertice_inicial, caminho, tamanho_caminho, true, false);
 
     // Imprime o caminho encontrado
     std::cout << "Caminho encontrado pelo caixeiro viajante guloso: ";
     for (int i = 0; i < tamanho_caminho; ++i) {
-        std::cout << (caminho[i] + 1) << " "; // Incrementa o valor do nó ao imprimir
+        std::cout << (caminho[i] + 1) << " ";  // Incrementa o valor do nó ao imprimir
     }
     std::cout << std::endl;
 
     // Libera a memória alocada para o caminho
     delete[] caminho;
+
+    // Libera a memória alocada para o grafo
+    delete grafo;
 
     return 0;
 }

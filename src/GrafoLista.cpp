@@ -1,4 +1,4 @@
-#include "GrafoLista.h"
+#include "../include/GrafoLista.h"
 
 GrafoLista::GrafoLista(int n, bool dir, bool vp, bool ap)
     : Grafo(n, dir, vp, ap) {
