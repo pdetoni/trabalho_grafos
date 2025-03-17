@@ -25,7 +25,7 @@ void imprimirDescricao(Grafo* grafo) {
  * @brief Função principal do programa.
  * 
  * Lê os argumentos da linha de comando, carrega o grafo a partir de um arquivo,
- * executa o algoritmo do caixeiro viajante guloso e imprime o caminho encontrado.
+ * executa o algoritmo do caixeiro viajante guloso e imprime o custo total do trajeto.
  * 
  * @param argc Número de argumentos da linha de comando.
  * @param argv Vetor de argumentos da linha de comando.
@@ -68,14 +68,12 @@ int main(int argc, char* argv[]) {
     Grafo* grafo = nullptr; // Ponteiro para o grafo
 
     // Cria o grafo com base no tipo especificado
-    // Cria o grafo com base no tipo especificado
     if (tipo == "-m") {
         grafo = new GrafoMatriz(numVertices, direcionado, verticesPonderados, arestasPonderadas);
     } else if (tipo == "-l") {
         grafo = new GrafoLista(numVertices, direcionado, verticesPonderados, arestasPonderadas);
     }
 
-    // Carrega o grafo a partir do arquivo
     // Carrega o grafo a partir do arquivo
     grafo->carrega_grafo(arquivo);
 
@@ -86,15 +84,11 @@ int main(int argc, char* argv[]) {
     int* caminho = nullptr;
     int tamanho_caminho = 0;
 
-    // Chama a função caixeiro_viajante_guloso
-    grafo->caixeiro_viajante_guloso(vertice_inicial, caminho, tamanho_caminho, true, false);
+    // Chama a função caixeiro_viajante e obtém o custo total do trajeto
+    int custo_total = grafo->caixeiro_viajante(vertice_inicial, caminho, tamanho_caminho, false, false);
 
-    // Imprime o caminho encontrado
-    std::cout << "Caminho encontrado pelo caixeiro viajante guloso: ";
-    for (int i = 0; i < tamanho_caminho; ++i) {
-        std::cout << (caminho[i] + 1) << " ";  // Incrementa o valor do nó ao imprimir
-    }
-    std::cout << std::endl;
+    // Imprime o custo total do trajeto
+    std::cout << "Custo total do trajeto encontrado pelo caixeiro viajante guloso: " << custo_total << std::endl;
 
     // Libera a memória alocada para o caminho
     delete[] caminho;

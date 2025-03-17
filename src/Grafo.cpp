@@ -320,10 +320,11 @@ int Grafo::menor_distancia_dijkstra(int u, int v) {
  * @param randomize Define se a escolha de vértices será aleatória.
  * @param reativo Define se o algoritmo deve se adaptar a modificações no grafo.
  */
-void Grafo::caixeiro_viajante_guloso(int vertice_inicial, int*& caminho, int& tamanho_caminho, bool randomize, bool reativo) {
+int Grafo::caixeiro_viajante(int vertice_inicial, int*& caminho, int& tamanho_caminho, bool randomize, bool reativo) {
     bool* visitado = new bool[numVertices]();  // Inicializa com false
     int* caminho_temp = new int[numVertices + 1];  // +1 para o possível retorno ao início
-    
+    int custo_total = 0;
+
     int atual = vertice_inicial;
     caminho_temp[0] = atual;
     visitado[atual] = true;
@@ -406,6 +407,13 @@ void Grafo::caixeiro_viajante_guloso(int vertice_inicial, int*& caminho, int& ta
         caminho_temp[contador++] = atual;
         visitado[atual] = true;
 
+        // Adiciona o custo da aresta ao custo total
+        int peso = 1;
+        if (arestasPonderadas) {
+            get_pesoAresta(caminho_temp[contador - 2], atual, peso);
+        }
+        custo_total += peso;
+
         // Se o algoritmo for reativo, verifica se o grafo foi modificado
         if (reativo) {
             // Verifica se o número de nós ou arestas mudou
@@ -437,6 +445,11 @@ void Grafo::caixeiro_viajante_guloso(int vertice_inicial, int*& caminho, int& ta
     // Tenta completar o ciclo voltando ao vértice inicial
     if (existeAresta(atual, vertice_inicial)) {
         caminho_temp[contador++] = vertice_inicial;
+        int peso = 1;
+        if (arestasPonderadas) {
+            get_pesoAresta(atual, vertice_inicial, peso);
+        }
+        custo_total += peso;
     } else {
         // Se não há aresta direta de volta ao início, encontra o caminho mais curto para voltar
         int menor_peso_volta = std::numeric_limits<int>::max();
@@ -463,9 +476,21 @@ void Grafo::caixeiro_viajante_guloso(int vertice_inicial, int*& caminho, int& ta
             // Adiciona o vértice intermediário e o vértice inicial ao caminho
             caminho_temp[contador++] = melhor_vizinho_volta;
             caminho_temp[contador++] = vertice_inicial;
+            int peso_atual_v = 1;
+            int peso_v_inicial = 1;
+            if (arestasPonderadas) {
+                get_pesoAresta(atual, melhor_vizinho_volta, peso_atual_v);
+                get_pesoAresta(melhor_vizinho_volta, vertice_inicial, peso_v_inicial);
+            }
+            custo_total += peso_atual_v + peso_v_inicial;
         } else {
             // Se não encontrou um caminho de volta, simplesmente adiciona o vértice inicial
             caminho_temp[contador++] = vertice_inicial;
+            int peso = 1;
+            if (arestasPonderadas) {
+                get_pesoAresta(atual, vertice_inicial, peso);
+            }
+            custo_total += peso;
         }
     }
     
@@ -479,4 +504,6 @@ void Grafo::caixeiro_viajante_guloso(int vertice_inicial, int*& caminho, int& ta
     // Libera a memória temporária
     delete[] caminho_temp;
     delete[] visitado;
+
+    return custo_total;
 }
