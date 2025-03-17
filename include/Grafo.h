@@ -165,8 +165,11 @@
       * @param randomize Define se o método usa aleatoriedade.
       * @param reativo Define se o método é reativo.
       */
-     void caixeiro_viajante_guloso(int vertice_inicial, int*& caminho, int& tamanho_caminho, bool randomize = false, bool reativo = false);
- };
+     void caixeiro_viajante_guloso(int vertice_inicial, int*& caminho, int& tamanho_caminho, bool randomize, bool reativo, double alpha_inicial, double alpha_step, int max_tentativas);
+ 
+     double calcularQualidadeSolucao(int* caminho, int tamanho_caminho, double alpha);
+ 
+    };
  
  #endif // GRAFO_H
  

@@ -320,7 +320,7 @@ int Grafo::menor_distancia_dijkstra(int u, int v) {
  * @param randomize Define se a escolha de vértices será aleatória.
  * @param reativo Define se o algoritmo deve se adaptar a modificações no grafo.
  */
-void Grafo::caixeiro_viajante_guloso(int vertice_inicial, int*& caminho, int& tamanho_caminho, bool randomize, bool reativo) {
+void Grafo::caixeiro_viajante_guloso(int vertice_inicial, int*& caminho, int& tamanho_caminho, bool randomize, bool reativo, double alpha_inicial, double alpha_step, int max_tentativas) {
     bool* visitado = new bool[numVertices]();  // Inicializa com false
     int* caminho_temp = new int[numVertices + 1];  // +1 para o possível retorno ao início
     
@@ -334,138 +334,134 @@ void Grafo::caixeiro_viajante_guloso(int vertice_inicial, int*& caminho, int& ta
         std::srand(std::time(0));  // Usa o tempo atual como semente
     }
 
-    // Variáveis para verificar mudanças no grafo
-    int numVerticesOriginal = numVertices;
-    int* arestas;
-    int numArestasOriginal;
-    get_arestas(arestas, numArestasOriginal);  // Função que retorna o número de arestas no grafo
-    delete[] arestas;
-    
-    // Enquanto não visitamos todos os vértices
-    for (int i = 1; i < numVertices; i++) {
-        int melhor_vizinho = -1;
-        int menor_peso = std::numeric_limits<int>::max();
-        
-        // Pega todos os vizinhos do vértice atual
-        int* vizinhos;
-        int num_vizinhos;
-        get_vizinhos(atual, vizinhos, num_vizinhos);
-        
-        // Se randomize estiver ativado, escolhe um vizinho aleatório
-        if (randomize) {
-            int tentativas = 0;
-            while (tentativas < num_vizinhos) {
-                int indice_aleatorio = std::rand() % num_vizinhos;  // Escolhe um índice aleatório
-                int vizinho = vizinhos[indice_aleatorio];
-                if (!visitado[vizinho]) {
-                    melhor_vizinho = vizinho;
-                    break;
-                }
-                tentativas++;
-            }
-        } else {
-            // Caso contrário, escolhe o vizinho com o menor peso
-            for (int j = 0; j < num_vizinhos; j++) {
-                int vizinho = vizinhos[j];
-                if (!visitado[vizinho]) {
-                    int peso = 1;
-                    if (arestasPonderadas) {
-                        get_pesoAresta(atual, vizinho, peso);
-                    }
-                    
-                    // Verifica se o vizinho permite retornar ao início
-                    if (peso < menor_peso) {
-                        menor_peso = peso;
-                        melhor_vizinho = vizinho;
-                    }
-                }
-            }
+    // Variáveis para controle do alpha e da qualidade da solução
+    double alpha = alpha_inicial;
+    int tentativas = 0;
+    bool solucao_aceita = false;
+
+    while (!solucao_aceita && tentativas < max_tentativas) {
+        // Reinicializa o caminho e os vértices visitados para cada tentativa
+        for (int i = 0; i < numVertices; i++) {
+            visitado[i] = false;
         }
-        
-        // Libera a memória dos vizinhos
-        delete[] vizinhos;
-        
-        // Se não encontrou mais vizinhos, vamos verificar se podemos voltar ao início
-        if (melhor_vizinho == -1) {
-            // Se não há conexão direta com todos os vértices, tenta encontrar qualquer não visitado
-            for (int v = 0; v < numVertices; v++) {
-                if (!visitado[v]) {
-                    melhor_vizinho = v;
+        atual = vertice_inicial;
+        caminho_temp[0] = atual;
+        visitado[atual] = true;
+        contador = 1;
+
+        // Enquanto não visitamos todos os vértices
+        for (int i = 1; i < numVertices; i++) {
+            int melhor_vizinho = -1;
+            int menor_peso = std::numeric_limits<int>::max();
+            
+            // Pega todos os vizinhos do vértice atual
+            int* vizinhos;
+            int num_vizinhos;
+            get_vizinhos(atual, vizinhos, num_vizinhos);
+            
+            // Se randomize estiver ativado, escolhe um vizinho aleatório
+            if (randomize) {
+                int tentativas_vizinho = 0;
+                while (tentativas_vizinho < num_vizinhos) {
+                    int indice_aleatorio = std::rand() % num_vizinhos;  // Escolhe um índice aleatório
+                    int vizinho = vizinhos[indice_aleatorio];
+                    if (!visitado[vizinho]) {
+                        melhor_vizinho = vizinho;
+                        break;
+                    }
+                    tentativas_vizinho++;
+                }
+            } else {
+                // Caso contrário, escolhe o vizinho com o menor peso
+                for (int j = 0; j < num_vizinhos; j++) {
+                    int vizinho = vizinhos[j];
+                    if (!visitado[vizinho]) {
+                        int peso = 1;
+                        if (arestasPonderadas) {
+                            get_pesoAresta(atual, vizinho, peso);
+                        }
+                        
+                        // Verifica se o vizinho permite retornar ao início
+                        if (peso < menor_peso) {
+                            menor_peso = peso;
+                            melhor_vizinho = vizinho;
+                        }
+                    }
+                }
+            }
+            
+            // Libera a memória dos vizinhos
+            delete[] vizinhos;
+            
+            // Se não encontrou mais vizinhos, vamos verificar se podemos voltar ao início
+            if (melhor_vizinho == -1) {
+                // Se não há conexão direta com todos os vértices, tenta encontrar qualquer não visitado
+                for (int v = 0; v < numVertices; v++) {
+                    if (!visitado[v]) {
+                        melhor_vizinho = v;
+                        break;
+                    }
+                }
+                
+                // Se ainda não encontrou, significa que visitamos todos os vértices acessíveis
+                if (melhor_vizinho == -1) {
                     break;
                 }
             }
             
-            // Se ainda não encontrou, significa que visitamos todos os vértices acessíveis
-            if (melhor_vizinho == -1) {
-                break;
-            }
+            // Adiciona o melhor vizinho ao caminho
+            atual = melhor_vizinho;
+            caminho_temp[contador++] = atual;
+            visitado[atual] = true;
         }
         
-        // Adiciona o melhor vizinho ao caminho
-        atual = melhor_vizinho;
-        caminho_temp[contador++] = atual;
-        visitado[atual] = true;
-
-        // Se o algoritmo for reativo, verifica se o grafo foi modificado
-        if (reativo) {
-            // Verifica se o número de nós ou arestas mudou
-            int numVerticesAtual = numVertices;
-            int numArestasAtual;
-            get_arestas(arestas, numArestasAtual);
-            delete[] arestas;
-
-            if (numVerticesAtual != numVerticesOriginal || numArestasAtual != numArestasOriginal) {
-                std::cout << "Grafo modificado! Reinicializando o caminho..." << std::endl;
-
-                // Reinicializa o caminho parcialmente
-                for (int v = 0; v < numVertices; v++) {
-                    visitado[v] = false;  // Marca todos os nós como não visitados
-                }
-
-                // Reinicia o caminho a partir do nó atual
-                caminho_temp[0] = atual;
-                visitado[atual] = true;
-                contador = 1;
-
-                // Atualiza as variáveis de controle
-                numVerticesOriginal = numVerticesAtual;
-                numArestasOriginal = numArestasAtual;
-            }
-        }
-    }
-    
-    // Tenta completar o ciclo voltando ao vértice inicial
-    if (existeAresta(atual, vertice_inicial)) {
-        caminho_temp[contador++] = vertice_inicial;
-    } else {
-        // Se não há aresta direta de volta ao início, encontra o caminho mais curto para voltar
-        int menor_peso_volta = std::numeric_limits<int>::max();
-        int melhor_vizinho_volta = -1;
-        
-        // Procura o vértice mais próximo do vértice inicial que tenha uma aresta para ele
-        for (int v = 0; v < numVertices; v++) {
-            if (v != atual && existeAresta(atual, v) && existeAresta(v, vertice_inicial)) {
-                int peso_atual_v = 1;
-                int peso_v_inicial = 1;
-                if (arestasPonderadas) {
-                    get_pesoAresta(atual, v, peso_atual_v);
-                    get_pesoAresta(v, vertice_inicial, peso_v_inicial);
-                }
-                int peso_total = peso_atual_v + peso_v_inicial;
-                if (peso_total < menor_peso_volta) {
-                    menor_peso_volta = peso_total;
-                    melhor_vizinho_volta = v;
-                }
-            }
-        }
-        
-        if (melhor_vizinho_volta != -1) {
-            // Adiciona o vértice intermediário e o vértice inicial ao caminho
-            caminho_temp[contador++] = melhor_vizinho_volta;
+        // Tenta completar o ciclo voltando ao vértice inicial
+        if (existeAresta(atual, vertice_inicial)) {
             caminho_temp[contador++] = vertice_inicial;
         } else {
-            // Se não encontrou um caminho de volta, simplesmente adiciona o vértice inicial
-            caminho_temp[contador++] = vertice_inicial;
+            // Se não há aresta direta de volta ao início, encontra o caminho mais curto para voltar
+            int menor_peso_volta = std::numeric_limits<int>::max();
+            int melhor_vizinho_volta = -1;
+            
+            // Procura o vértice mais próximo do vértice inicial que tenha uma aresta para ele
+            for (int v = 0; v < numVertices; v++) {
+                if (v != atual && existeAresta(atual, v) && existeAresta(v, vertice_inicial)) {
+                    int peso_atual_v = 1;
+                    int peso_v_inicial = 1;
+                    if (arestasPonderadas) {
+                        get_pesoAresta(atual, v, peso_atual_v);
+                        get_pesoAresta(v, vertice_inicial, peso_v_inicial);
+                    }
+                    int peso_total = peso_atual_v + peso_v_inicial;
+                    if (peso_total < menor_peso_volta) {
+                        menor_peso_volta = peso_total;
+                        melhor_vizinho_volta = v;
+                    }
+                }
+            }
+            
+            if (melhor_vizinho_volta != -1) {
+                // Adiciona o vértice intermediário e o vértice inicial ao caminho
+                caminho_temp[contador++] = melhor_vizinho_volta;
+                caminho_temp[contador++] = vertice_inicial;
+            } else {
+                // Se não encontrou um caminho de volta, simplesmente adiciona o vértice inicial
+                caminho_temp[contador++] = vertice_inicial;
+            }
+        }
+        
+        // Avalia a qualidade da solução com base no alpha
+        if (reativo) {
+            double qualidade_solucao = calcularQualidadeSolucao(caminho_temp, contador, alpha);
+            if (qualidade_solucao >= alpha) {
+                solucao_aceita = true;
+            } else {
+                // Ajusta o alpha para a próxima tentativa
+                alpha += alpha_step;
+                tentativas++;
+            }
+        } else {
+            solucao_aceita = true;  // Aceita a solução imediatamente se não for reativo
         }
     }
     
@@ -479,4 +475,22 @@ void Grafo::caixeiro_viajante_guloso(int vertice_inicial, int*& caminho, int& ta
     // Libera a memória temporária
     delete[] caminho_temp;
     delete[] visitado;
+}
+
+// Função para calcular a qualidade da solução (exemplo simples)
+double Grafo::calcularQualidadeSolucao(int* caminho, int tamanho_caminho, double alpha) {
+    // Aqui você pode implementar uma métrica de qualidade.
+    // Por exemplo, calcular o custo total do caminho e comparar com um valor esperado.
+    int custo_total = 0;
+    for (int i = 0; i < tamanho_caminho - 1; i++) {
+        int peso = 1;
+        if (arestasPonderadas) {
+            get_pesoAresta(caminho[i], caminho[i + 1], peso);
+        }
+        custo_total += peso;
+    }
+    
+    // Exemplo de critério: a solução é aceita se o custo total for menor que alpha * custo_esperado
+    double custo_esperado = 100;  // Defina um custo esperado adequado
+    return (custo_total < alpha * custo_esperado) ? 1.0 : 0.0;
 }
